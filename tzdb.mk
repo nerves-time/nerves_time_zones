@@ -10,11 +10,14 @@
 # MIX_APP_PATH  path to the build directory
 # CC_FOR_BUILD  C compiler
 
+TOP := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+
 # Since this is for test purposes, be sure this matches what the tz (or tzdata)
 # libraries use or you'll get discrepancies that are ok.
 TZDB_NAME=tzdb-$(TZDB_VERSION)
-TZDB_FILENAME=$(TZDB_NAME).tar.lz
-TZDB_URL=https://data.iana.org/time-zones/releases/$(TZDB_FILENAME)
+TZDB_ARCHIVE_NAME=$(TZDB_NAME).tar.lz
+TZDB_ARCHIVE_PATH=$(TOP)/$(TZDB_ARCHIVE_NAME)
+TZDB_URL=https://data.iana.org/time-zones/releases/$(TZDB_ARCHIVE_NAME)
 ZIC_OPTIONS=-r @$(TZDB_EARLIEST_DATE)/@$(TZDB_LATEST_DATE)
 
 PREFIX = $(MIX_APP_PATH)/priv
@@ -63,11 +66,11 @@ $(BUILD)/tzdb/zic: $(BUILD)/tzdb $(BUILD)/tzdb/zic.c $(BUILD)/tzdb/version.h
 $(PREFIX)/zoneinfo: $(BUILD)/tzdb/zic $(PREFIX) Makefile
 	cd $(BUILD)/tzdb && ./zic -d $@ $(ZIC_OPTIONS) $(TDATA)
 
-$(TZDB_FILENAME):
-	wget $(TZDB_URL)
+$(TZDB_ARCHIVE_PATH):
+	wget -O $(TZDB_ARCHIVE_PATH) $(TZDB_URL)
 
-$(BUILD)/tzdb: $(TZDB_FILENAME) $(BUILD)
-	cd $(BUILD) && lzip -d -c $(PWD)/$(TZDB_FILENAME) | tar x
+$(BUILD)/tzdb: $(TZDB_ARCHIVE_PATH) $(BUILD)
+	cd $(BUILD) && lzip -d -c $(TZDB_ARCHIVE_PATH) | tar x
 	mv $(BUILD)/$(TZDB_NAME) $@
 
 $(PREFIX) $(BUILD):
