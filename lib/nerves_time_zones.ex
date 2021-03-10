@@ -47,4 +47,20 @@ defmodule NervesTimeZones do
   """
   @spec tz_environment() :: %{String.t() => String.t()}
   defdelegate tz_environment, to: NervesTimeZones.Server
+
+  @doc """
+  Return all known time zones
+
+  This function scans the time zone database each time it's called. It's
+  not slow, but if you just need to verify whether a time zone exists,
+  call `valid_time_zone?/1` instead.
+  """
+  @spec time_zones() :: [String.t()]
+  defdelegate time_zones(), to: Zoneinfo
+
+  @doc """
+  Return whether a time zone is valid
+  """
+  @spec valid_time_zone?(String.t()) :: boolean
+  defdelegate valid_time_zone?(time_zone), to: Zoneinfo
 end

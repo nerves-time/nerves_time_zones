@@ -30,6 +30,19 @@ defmodule NervesTimeZonesTest do
     assert %{"TZDIR" => path, "TZ" => Path.join(path, tz)} == NervesTimeZones.tz_environment()
   end
 
+  test "valid_time_zone?/1" do
+    assert NervesTimeZones.valid_time_zone?("America/Chicago")
+    refute NervesTimeZones.valid_time_zone?("Luna/Mare_Tranquilitatis")
+    refute NervesTimeZones.valid_time_zone?("")
+  end
+
+  test "time_zones/0" do
+    tz_list = NervesTimeZones.time_zones()
+
+    assert "Africa/Nairobi" in tz_list
+    refute "" in tz_list
+  end
+
   test "sets Calendar TimeZoneDatabase" do
     # The database isn't set in our config.exs. NervesTimeZones sets it
     assert Calendar.get_time_zone_database() == Zoneinfo.TimeZoneDatabase
