@@ -57,7 +57,7 @@ defmodule NervesTimeZonesTest do
     # data base is being used and less that the conversion is
     # correct.
 
-    expected = DateTime.new!(~D[2021-03-08], ~T[17:00:00], "America/Phoenix")
+    expected = DateTime.from_naive!(~N[2021-03-08 17:00:00], "America/Phoenix")
 
     assert {:ok, expected} ==
              DateTime.shift_zone(~U[2021-03-09 00:00:00Z], "America/Phoenix")
