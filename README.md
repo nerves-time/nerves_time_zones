@@ -1,5 +1,8 @@
 # NervesTimeZones
 
+[![Hex version](https://img.shields.io/hexpm/v/nerves_time_zones.svg "Hex version")](https://hex.pm/packages/nerves_time_zones)
+[![CircleCI](https://circleci.com/gh/nerves-time/nerves_time_zones.svg?style=svg)](https://circleci.com/gh/nerves-time/nerves_time_zones)
+
 Local time and time zones for Nerves devices
 
 NervesTimeZones provides a way of managing local time on embedded devices. It
