@@ -3,9 +3,9 @@ defmodule NervesTimeZones.MixProject do
 
   @version "0.1.0"
   @source_url "https://github.com/nerves-time/nerves_time_zones"
-  @tzdb_version "2020f"
-  @tzdb_earliest_date to_string(System.os_time(:second) - 86400)
-  @tzdb_latest_date to_string(System.os_time(:second) + 10 * 365 * 86400)
+  @tzdata_version "2020f"
+  @tzdata_earliest_date to_string(System.os_time(:second) - 86400)
+  @tzdata_latest_date to_string(System.os_time(:second) + 10 * 365 * 86400)
 
   def project do
     [
@@ -17,10 +17,11 @@ defmodule NervesTimeZones.MixProject do
       source_url: @source_url,
       compilers: [:elixir_make | Mix.compilers()],
       make_env: %{
-        "TZDB_VERSION" => @tzdb_version,
-        "TZDB_EARLIEST_DATE" => @tzdb_earliest_date,
-        "TZDB_LATEST_DATE" => @tzdb_latest_date
+        "TZDATA_VERSION" => @tzdata_version,
+        "TZDATA_EARLIEST_DATE" => @tzdata_earliest_date,
+        "TZDATA_LATEST_DATE" => @tzdata_latest_date
       },
+      make_error_message: "",
       make_targets: ["all"],
       make_clean: ["clean"],
       docs: docs(),

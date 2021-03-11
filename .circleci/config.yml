@@ -16,7 +16,7 @@ install_system_deps: &install_system_deps
   run:
     name: Install system dependencies
     command: |
-        apk add build-base lzip
+        apk add build-base
 
 jobs:
   build_elixir_1_11_otp_23:

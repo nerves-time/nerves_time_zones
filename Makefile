@@ -43,12 +43,12 @@ OBJ = $(SRC:c_src/%.c=$(BUILD)/%.o)
 calling_from_make:
 	mix compile
 
-all: install tzdb
+all: install tzdata
 
 install: $(PREFIX) $(BUILD) $(NIF)
 
-tzdb:
-	$(MAKE) -f tzdb.mk all
+tzdata:
+	$(MAKE) -f tzdata.mk all
 
 $(OBJ): $(HEADERS) Makefile
 
@@ -64,4 +64,4 @@ $(PREFIX) $(BUILD):
 clean:
 	$(RM) $(NIF) $(OBJ)
 
-.PHONY: all clean calling_from_make install
+.PHONY: all clean calling_from_make install tzdata
