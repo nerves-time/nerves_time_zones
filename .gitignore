@@ -26,4 +26,5 @@ nerves_time_zones-*.tar
 # Temporary files for e.g. tests
 /tmp
 
-/tzdb-*.tar.lz
+/tzdata*.tar.gz
+/tzcode/version.h

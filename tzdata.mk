@@ -10,24 +10,22 @@
 # MIX_APP_PATH  path to the build directory
 # CC_FOR_BUILD  C compiler
 
-TOP := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-
 # Since this is for test purposes, be sure this matches what the tz (or tzdata)
 # libraries use or you'll get discrepancies that are ok.
-TZDB_NAME=tzdb-$(TZDB_VERSION)
-TZDB_ARCHIVE_NAME=$(TZDB_NAME).tar.lz
-TZDB_ARCHIVE_PATH=$(TOP)/$(TZDB_ARCHIVE_NAME)
-TZDB_URL=https://data.iana.org/time-zones/releases/$(TZDB_ARCHIVE_NAME)
-ZIC_OPTIONS=-r @$(TZDB_EARLIEST_DATE)/@$(TZDB_LATEST_DATE)
+TZDATA_NAME=tzdata$(TZDATA_VERSION)
+TZDATA_ARCHIVE_NAME=$(TZDATA_NAME).tar.gz
+TZDATA_ARCHIVE_PATH=$(abspath $(TZDATA_ARCHIVE_NAME))
+TZDATA_URL=https://data.iana.org/time-zones/releases/$(TZDATA_ARCHIVE_NAME)
+ZIC_OPTIONS=-r @$(TZDATA_EARLIEST_DATE)/@$(TZDATA_LATEST_DATE)
 
 PREFIX = $(MIX_APP_PATH)/priv
-BUILD  = $(MIX_APP_PATH)/tzdb
+BUILD  = $(MIX_APP_PATH)/build
 CC_FOR_BUILD=cc
 
 calling_from_make:
 	mix compile
 
-all: $(PREFIX)/zoneinfo
+all: $(PREFIX) $(BUILD) $(PREFIX)/zoneinfo
 
 ### Copied from tzcode Makefile
 
@@ -50,8 +48,8 @@ YDATA=          $(PRIMARY_YDATA) etcetera
 NDATA=          factory
 TDATA=          $(YDATA)
 
-$(BUILD)/tzdb/version.h: $(BUILD)/tzdb/version
-	VERSION=`cat $(BUILD)/tzdb/version` && printf '%s\n' \
+tzcode/version.h: tzcode/version
+	VERSION=`cat tzcode/version` && printf '%s\n' \
 		'static char const PKGVERSION[]="($(PACKAGE)) ";' \
 		"static char const TZVERSION[]=\"$$VERSION\";" \
 		'static char const REPORT_BUGS_TO[]="$(BUGEMAIL)";' \
@@ -60,18 +58,19 @@ $(BUILD)/tzdb/version.h: $(BUILD)/tzdb/version
 
 ### End copied definitions
 
-$(BUILD)/tzdb/zic: $(BUILD)/tzdb $(BUILD)/tzdb/zic.c $(BUILD)/tzdb/version.h
-	$(CC_FOR_BUILD) -o $@ $(BUILD)/tzdb/zic.c
+$(BUILD)/zic: tzcode/zic.c tzcode/version.h
+	$(CC_FOR_BUILD) -o $@ tzcode/zic.c
 
-$(PREFIX)/zoneinfo: $(BUILD)/tzdb/zic $(PREFIX) Makefile
-	cd $(BUILD)/tzdb && ./zic -d $@ $(ZIC_OPTIONS) $(TDATA)
+$(PREFIX)/zoneinfo: $(BUILD)/zic $(BUILD)/tzdata/.extracted Makefile
+	cd $(BUILD)/tzdata && $(BUILD)/zic -d $@ $(ZIC_OPTIONS) $(TDATA)
 
-$(TZDB_ARCHIVE_PATH):
-	wget -O $(TZDB_ARCHIVE_PATH) $(TZDB_URL)
+$(TZDATA_ARCHIVE_PATH):
+	wget -O $(TZDATA_ARCHIVE_PATH) $(TZDATA_URL)
 
-$(BUILD)/tzdb: $(TZDB_ARCHIVE_PATH) $(BUILD)
-	cd $(BUILD) && lzip -d -c $(TZDB_ARCHIVE_PATH) | tar x
-	mv $(BUILD)/$(TZDB_NAME) $@
+$(BUILD)/tzdata/.extracted: $(TZDATA_ARCHIVE_PATH)
+	mkdir -p $(BUILD)/tzdata
+	cd $(BUILD)/tzdata && tar xf $(TZDATA_ARCHIVE_PATH)
+	touch $@
 
 $(PREFIX) $(BUILD):
 	mkdir -p $@
