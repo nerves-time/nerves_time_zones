@@ -5,8 +5,10 @@ defmodule NervesTimeZones.Application do
 
   @impl Application
   def start(_type, _args) do
+    init_args = Application.get_all_env(:nerves_time_zones)
+
     children = [
-      {NervesTimeZones.Server, []}
+      {NervesTimeZones.Server, init_args}
     ]
 
     opts = [strategy: :one_for_one, name: NervesTimeZones.Supervisor]

@@ -5,11 +5,15 @@ defmodule NervesTimeZonesTest do
   import ExUnit.CaptureLog
 
   describe "persistence" do
-    test "default is UTC" do
-      capture_log(fn -> Application.stop(:nerves_time_zones) end)
-      NervesTimeZones.Persistence.reset()
+    test "get returns what was set" do
+      :ok = NervesTimeZones.set_time_zone("America/Indiana/Indianapolis")
+      assert NervesTimeZones.get_time_zone() == "America/Indiana/Indianapolis"
+    end
 
-      Application.start(:nerves_time_zones)
+    test "reset restores default" do
+      :ok = NervesTimeZones.set_time_zone("Atlantic/Bermuda")
+      :ok = NervesTimeZones.reset_time_zone()
+
       assert NervesTimeZones.get_time_zone() == "Etc/UTC"
     end
 
@@ -19,6 +23,16 @@ defmodule NervesTimeZonesTest do
 
       Application.start(:nerves_time_zones)
       assert NervesTimeZones.get_time_zone() == "America/New_York"
+    end
+
+    test "default is UTC" do
+      # Clear out the time zone file
+      NervesTimeZones.reset_time_zone()
+      capture_log(fn -> Application.stop(:nerves_time_zones) end)
+
+      # This should be a fresh start
+      Application.start(:nerves_time_zones)
+      assert NervesTimeZones.get_time_zone() == "Etc/UTC"
     end
   end
 

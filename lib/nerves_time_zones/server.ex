@@ -6,7 +6,14 @@ defmodule NervesTimeZones.Server do
 
   alias NervesTimeZones.{Nif, Persistence}
 
-  @spec start_link(keyword()) :: GenServer.on_start()
+  @default_time_zone "Etc/UTC"
+
+  defstruct data_dir: "/data/nerves_time_zones",
+            current_time_zone: nil
+
+  @type init_args() :: [data_dir: Path.t()]
+
+  @spec start_link(init_args()) :: GenServer.on_start()
   def start_link(init_args) do
     GenServer.start_link(__MODULE__, init_args, name: __MODULE__)
   end
@@ -21,43 +28,57 @@ defmodule NervesTimeZones.Server do
     GenServer.call(__MODULE__, :get_time_zone)
   end
 
+  @spec reset_time_zone() :: :ok
+  def reset_time_zone() do
+    GenServer.call(__MODULE__, :reset_time_zone)
+  end
+
   @spec tz_environment() :: %{String.t() => String.t()}
   def tz_environment() do
     GenServer.call(__MODULE__, :tz_environment)
   end
 
   @impl GenServer
-  def init(_init_args) do
+  def init(init_args) do
     configure_zoneinfo()
 
+    state = struct(__MODULE__, init_args)
+
     time_zone =
-      case Persistence.load_time_zone() do
+      case Persistence.load_time_zone(state.data_dir) do
         {:ok, zone} -> zone
-        _other -> "Etc/UTC"
+        _other -> @default_time_zone
       end
 
     set_tz_var(time_zone)
-    {:ok, time_zone}
+    {:ok, %{state | current_time_zone: time_zone}}
   end
 
   @impl GenServer
-  def handle_call({:set_time_zone, new_time_zone}, _from, current_time_zone) do
+  def handle_call({:set_time_zone, new_time_zone}, _from, state) do
     with :ok <- check_time_zone(new_time_zone),
-         :ok <- Persistence.save_time_zone(new_time_zone) do
+         :ok <- Persistence.save_time_zone(state.data_dir, new_time_zone) do
       set_tz_var(new_time_zone)
-      {:reply, :ok, new_time_zone}
+      {:reply, :ok, %{state | current_time_zone: new_time_zone}}
     else
-      error -> {:reply, error, current_time_zone}
+      error -> {:reply, error, state}
     end
   end
 
-  def handle_call(:get_time_zone, _from, current_time_zone) do
-    {:reply, current_time_zone, current_time_zone}
+  def handle_call(:get_time_zone, _from, state) do
+    {:reply, state.current_time_zone, state}
   end
 
-  def handle_call(:tz_environment, _from, current_time_zone) do
-    env = %{"TZ" => time_zone_path(current_time_zone), "TZDIR" => zoneinfo_path()}
-    {:reply, env, current_time_zone}
+  def handle_call(:reset_time_zone, _from, state) do
+    _ = Persistence.reset(state.data_dir)
+    time_zone = @default_time_zone
+    set_tz_var(time_zone)
+    {:reply, :ok, %{state | current_time_zone: time_zone}}
+  end
+
+  def handle_call(:tz_environment, _from, state) do
+    env = %{"TZ" => time_zone_path(state.current_time_zone), "TZDIR" => zoneinfo_path()}
+    {:reply, env, state}
   end
 
   defp check_time_zone(time_zone) do
