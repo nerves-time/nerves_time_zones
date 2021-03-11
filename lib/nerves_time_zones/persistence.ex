@@ -3,9 +3,8 @@ defmodule NervesTimeZones.Persistence do
 
   @file_name "localtime"
 
-  @spec(save_time_zone(String.t()) :: :ok, {:error, any()})
-  def save_time_zone(time_zone) do
-    data_dir = data_directory()
+  @spec(save_time_zone(Path.t(), String.t()) :: :ok, {:error, any()})
+  def save_time_zone(data_dir, time_zone) do
     path = Path.join(data_dir, @file_name)
 
     with :ok <- File.mkdir_p(data_dir) do
@@ -13,16 +12,16 @@ defmodule NervesTimeZones.Persistence do
     end
   end
 
-  @spec load_time_zone() :: {:ok, String.t()} | {:error, any()}
-  def load_time_zone() do
-    Path.join(data_directory(), @file_name)
+  @spec load_time_zone(Path.t()) :: {:ok, String.t()} | {:error, any()}
+  def load_time_zone(data_dir) do
+    Path.join(data_dir, @file_name)
     |> File.read()
     |> sanity_check()
   end
 
-  @spec reset() :: :ok | {:error, atom}
-  def reset() do
-    Path.join(data_directory(), @file_name)
+  @spec reset(Path.t()) :: :ok | {:error, atom}
+  def reset(data_dir) do
+    Path.join(data_dir, @file_name)
     |> File.rm()
   end
 
@@ -40,9 +39,5 @@ defmodule NervesTimeZones.Persistence do
     n = byte_size(time_zone)
 
     n > 0 and n < 255 and String.valid?(time_zone)
-  end
-
-  defp data_directory() do
-    Application.get_env(:nerves_time_zones, :data_dir, "/data/nerves_time_zones")
   end
 end

@@ -39,6 +39,14 @@ defmodule NervesTimeZones do
   defdelegate get_time_zone(), to: NervesTimeZones.Server
 
   @doc """
+  Reset the time zone to the default
+
+  This cleans up any saved time zone information and reapplies the defaults.
+  """
+  @spec reset_time_zone() :: :ok
+  defdelegate reset_time_zone(), to: NervesTimeZones.Server
+
+  @doc """
   Return environment variables for running OS processes
 
   If you're using `System.cmd/3` to start an OS process that is time zone
