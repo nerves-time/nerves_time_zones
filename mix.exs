@@ -52,13 +52,19 @@ defmodule NervesTimeZones.MixProject do
   defp package do
     %{
       files: [
-        "lib",
+        "CHANGELOG.md",
         "c_src/*.[ch]",
+        "lib",
+        "LICENSE",
         "mix.exs",
         "README.md",
-        "LICENSE",
-        "CHANGELOG.md",
-        "Makefile"
+        "Makefile",
+        "tzcode/private.h",
+        "tzcode/README.md",
+        "tzcode/tzfile.h",
+        "tzcode/version",
+        "tzcode/zic.c",
+        "tzdata.mk"
       ],
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => @source_url}
