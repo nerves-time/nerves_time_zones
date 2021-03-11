@@ -39,6 +39,10 @@ defmodule NervesTimeZonesTest do
   test "time_zones/0" do
     tz_list = NervesTimeZones.time_zones()
 
+    # This probably changes with tzdata releases, but if it's not in this
+    # range, it would be good to double check the database generation.
+    assert_in_delta length(tz_list), 472, 10
+
     assert "Africa/Nairobi" in tz_list
     refute "" in tz_list
   end

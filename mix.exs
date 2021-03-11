@@ -67,7 +67,7 @@ defmodule NervesTimeZones.MixProject do
 
   defp deps do
     [
-      {:zoneinfo, "~> 0.1.0"},
+      {:zoneinfo, "~> 0.1.2"},
       {:ex_doc, "~> 0.22", only: :docs, runtime: false},
       {:dialyxir, "~> 1.1.0", only: :dev, runtime: false},
       {:elixir_make, "~> 0.6", runtime: false}
