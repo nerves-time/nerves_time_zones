@@ -6,16 +6,38 @@ defmodule NervesTimeZones.Server do
 
   alias NervesTimeZones.{Nif, Persistence}
 
+  @default_data_dir "/data/nerves_time_zones"
   @default_time_zone "Etc/UTC"
 
-  defstruct data_dir: "/data/nerves_time_zones",
+  defstruct data_dir: @default_data_dir,
+            default_time_zone: @default_time_zone,
             current_time_zone: nil
 
   @type init_args() :: [data_dir: Path.t()]
 
   @spec start_link(init_args()) :: GenServer.on_start()
   def start_link(init_args) do
-    GenServer.start_link(__MODULE__, init_args, name: __MODULE__)
+    GenServer.start_link(__MODULE__, check_args(init_args), name: __MODULE__)
+  end
+
+  defp check_args(pending_args, good_args \\ [])
+
+  defp check_args([], good_args), do: good_args
+
+  defp check_args([{:data_dir, data_dir} = arg | rest], good_args) when is_binary(data_dir) do
+    check_args(rest, [arg | good_args])
+  end
+
+  defp check_args([{:default_time_zone, zone} = arg | rest], good_args) when is_binary(zone) do
+    if Zoneinfo.valid_time_zone?(zone) do
+      check_args(rest, [arg | good_args])
+    else
+      Logger.warn(
+        "Default time zone `#{zone}` isn't valid. Using #{@default_time_zone} instead. Call `NervesTimeZones.time_zones/0` for list."
+      )
+
+      check_args(rest, good_args)
+    end
   end
 
   @spec set_time_zone(String.t()) :: :ok | {:error, any()}
@@ -47,7 +69,7 @@ defmodule NervesTimeZones.Server do
     time_zone =
       case Persistence.load_time_zone(state.data_dir) do
         {:ok, zone} -> zone
-        _other -> @default_time_zone
+        _other -> state.default_time_zone
       end
 
     set_tz_var(time_zone)
@@ -71,9 +93,9 @@ defmodule NervesTimeZones.Server do
 
   def handle_call(:reset_time_zone, _from, state) do
     _ = Persistence.reset(state.data_dir)
-    time_zone = @default_time_zone
-    set_tz_var(time_zone)
-    {:reply, :ok, %{state | current_time_zone: time_zone}}
+
+    set_tz_var(state.default_time_zone)
+    {:reply, :ok, %{state | current_time_zone: state.default_time_zone}}
   end
 
   def handle_call(:tz_environment, _from, state) do

@@ -50,6 +50,13 @@ following in your project's `config.exs`:
 config :nerves_time_zones, data_dir: "./tmp/nerves_time_zones"
 ```
 
+The default time zone is "Etc/UTC". If you want it to be something else, set it
+in the config like this:
+
+```elixir
+config :nerves_time_zones, default_time_zone: "Europe/Paris"
+```
+
 ## Database example
 
 If you just start up IEx, you may have seen something like this:

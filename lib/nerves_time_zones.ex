@@ -42,6 +42,12 @@ defmodule NervesTimeZones do
   Reset the time zone to the default
 
   This cleans up any saved time zone information and reapplies the defaults.
+  The default time zone is "Etc/UTC", but this can be changed by adding
+  something like the following to your `config.exs`:
+
+  ```
+  config :nerves_time_zones, default_time_zone: "Asia/Tokyo"
+  ```
   """
   @spec reset_time_zone() :: :ok
   defdelegate reset_time_zone(), to: NervesTimeZones.Server

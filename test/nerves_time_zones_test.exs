@@ -34,6 +34,41 @@ defmodule NervesTimeZonesTest do
       Application.start(:nerves_time_zones)
       assert NervesTimeZones.get_time_zone() == "Etc/UTC"
     end
+
+    test "default can be changed" do
+      # Clear out the time zone file
+      NervesTimeZones.reset_time_zone()
+      capture_log(fn -> Application.stop(:nerves_time_zones) end)
+
+      # This should be a fresh start
+      Application.put_env(:nerves_time_zones, :default_time_zone, "America/Chicago")
+      Application.start(:nerves_time_zones)
+      assert NervesTimeZones.get_time_zone() == "America/Chicago"
+
+      # Restore the default
+      :application.unset_env(:nerves_time_zones, :default_time_zone)
+      capture_log(fn -> Application.stop(:nerves_time_zones) end)
+      Application.start(:nerves_time_zones)
+    end
+
+    test "setting invalid default time zones logs a warning" do
+      # Clear out the time zone file
+      NervesTimeZones.reset_time_zone()
+      capture_log(fn -> Application.stop(:nerves_time_zones) end)
+
+      # This should be a fresh start
+      Application.put_env(:nerves_time_zones, :default_time_zone, "Mars/Olympus_Mons")
+
+      assert capture_log(fn -> Application.start(:nerves_time_zones) end) =~
+               "Using Etc/UTC instead"
+
+      assert NervesTimeZones.get_time_zone() == "Etc/UTC"
+
+      # Restore the default
+      :application.unset_env(:nerves_time_zones, :default_time_zone)
+      capture_log(fn -> Application.stop(:nerves_time_zones) end)
+      Application.start(:nerves_time_zones)
+    end
   end
 
   test "tz_environment/0" do
@@ -45,7 +80,7 @@ defmodule NervesTimeZonesTest do
   end
 
   test "valid_time_zone?/1" do
-    assert NervesTimeZones.valid_time_zone?("America/Chicago")
+    assert NervesTimeZones.valid_time_zone?("America/Halifax")
     refute NervesTimeZones.valid_time_zone?("Luna/Mare_Tranquilitatis")
     refute NervesTimeZones.valid_time_zone?("")
   end
