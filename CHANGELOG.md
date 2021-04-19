@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.3
+
+* Updates
+  * Update the IANA database to 2021a
+  * Add GitHub action to check for IANA database updates and automatically send
+    a PR. Thanks to Connor Rigby for huge time saver.
+
 ## v0.1.2
 
 * New features
