@@ -1,26 +1,16 @@
 name: Check for IANA Database updates
+
 # Triggers every midnight UTC
 on:
   schedule:
-    - cron: '0 0 * * *'  
-  workflow_dispatch: 
+    - cron: '0 0 * * *'
+
 jobs:
-  build:
+  outdated:
     name: Check for IANA Database updates
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - run: .github/workflows/update-iana-db-version.sh
-    - run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git checkout -b iana-db-update
-          git add mix.exs
-          git commit -m "Update IANA Database"
-          git push origin iana-db-update
-
-    - uses: repo-sync/pull-request@v2
-      with:
-        destination_branch: main
-        source_branch: iana-db-update
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
