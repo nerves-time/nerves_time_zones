@@ -38,14 +38,23 @@ defmodule NervesTimeZonesTest do
     test "default can be changed" do
       # Clear out the time zone file
       NervesTimeZones.reset_time_zone()
-      capture_log(fn -> Application.stop(:nerves_time_zones) end)
 
-      # This should be a fresh start
+      capture_log(fn ->
+        Application.stop(:nerves_time_zones)
+        Application.stop(:zoneinfo)
+      end)
+
+      # This should simulate a fresh start and not get tricked by
+      # zoneinfo finding system time zone files.
+      Application.put_env(:zoneinfo, :tzpath, "/some/place/without/zoneinfo")
+      Calendar.put_time_zone_database(Calendar.UTCOnlyTimeZoneDatabase)
+
+      # Set the default and check that it is used
       Application.put_env(:nerves_time_zones, :default_time_zone, "America/Chicago")
-      Application.start(:nerves_time_zones)
+      Application.ensure_all_started(:nerves_time_zones)
       assert NervesTimeZones.get_time_zone() == "America/Chicago"
 
-      # Restore the default
+      # Restore the default for the next tests
       :application.unset_env(:nerves_time_zones, :default_time_zone)
       capture_log(fn -> Application.stop(:nerves_time_zones) end)
       Application.start(:nerves_time_zones)
