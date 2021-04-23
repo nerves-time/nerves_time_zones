@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.4
+
+* Bug fixes
+  * Setting the default timezone didn't work on Nerves. Thanks to @pojiro for
+    fixing this
+
 ## v0.1.3
 
 * Updates
