@@ -17,6 +17,7 @@ defmodule NervesTimeZones.Server do
 
   @spec start_link(init_args()) :: GenServer.on_start()
   def start_link(init_args) do
+    configure_zoneinfo()
     GenServer.start_link(__MODULE__, check_args(init_args), name: __MODULE__)
   end
 
@@ -62,8 +63,6 @@ defmodule NervesTimeZones.Server do
 
   @impl GenServer
   def init(init_args) do
-    configure_zoneinfo()
-
     state = struct(__MODULE__, init_args)
 
     time_zone =
