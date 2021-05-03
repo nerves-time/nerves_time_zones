@@ -1,10 +1,15 @@
 # Changelog
 
+## v0.1.5
+
+* Bug fixes
+  * Fix Makefile to support cross-compilation on Mac.
+
 ## v0.1.4
 
 * Bug fixes
   * Setting the default timezone didn't work on Nerves. Thanks to @pojiro for
-    fixing this
+    fixing this.
 
 ## v0.1.3
 
