@@ -26,9 +26,15 @@ NIF = $(PREFIX)/nif.so
 CFLAGS ?= -O2 -Wall -Wextra -Wno-unused-parameter -pedantic
 CFLAGS += -fPIC
 
-ifeq ($(shell uname -s),Darwin)
-    LDFLAGS += -undefined dynamic_lookup -dynamiclib
+ifeq ($(CROSSCOMPILE),)
+    # Native build
+    ifeq ($(shell uname -s),Darwin)
+        LDFLAGS += -undefined dynamic_lookup -dynamiclib
+    else
+        LDFLAGS += -fPIC -shared
+    endif
 else
+    # Crosscompiled build
     LDFLAGS += -fPIC -shared
 endif
 
