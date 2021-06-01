@@ -65,7 +65,7 @@ $(PREFIX)/zoneinfo: $(BUILD)/zic $(BUILD)/tzdata/.extracted Makefile
 	cd $(BUILD)/tzdata && $(BUILD)/zic -d $@ $(ZIC_OPTIONS) $(TDATA)
 
 $(TZDATA_ARCHIVE_PATH):
-	wget -O $(TZDATA_ARCHIVE_PATH) $(TZDATA_URL)
+	curl -L $(TZDATA_URL) > $@
 
 $(BUILD)/tzdata/.extracted: $(TZDATA_ARCHIVE_PATH)
 	mkdir -p $(BUILD)/tzdata
