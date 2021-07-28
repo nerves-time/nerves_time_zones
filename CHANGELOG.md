@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.6
+
+* Improvements
+  * Switch from `wget` to `curl` for database download to be friendlier to MacOS
+    users
+  * Cleanup and reduce Makefile prints
+
 ## v0.1.5
 
 * Bug fixes
