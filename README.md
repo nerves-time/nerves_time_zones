@@ -156,3 +156,17 @@ and calls [`tzset(3)`](https://man7.org/linux/man-pages/man3/tzset.3.html) with
 the TZif file. Unfortunately, the way to pass the time zone is via the `TZ`
 environment variable, so if `TZ` previously pointed to anything before this
 library runs, it won't afterwards.
+
+## License
+
+Copyright (C) 2021 Frank Hunleth
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
