@@ -59,12 +59,15 @@ tzcode/version.h: tzcode/version
 ### End copied definitions
 
 $(BUILD)/zic: tzcode/zic.c tzcode/version.h
+	@echo " HOSTCC $(notdir $@)"
 	$(CC_FOR_BUILD) -o $@ tzcode/zic.c
 
 $(PREFIX)/zoneinfo: $(BUILD)/zic $(BUILD)/tzdata/.extracted Makefile
+	@echo "    ZIC $(notdir $@)"
 	cd $(BUILD)/tzdata && $(BUILD)/zic -d $@ $(ZIC_OPTIONS) $(TDATA)
 
 $(TZDATA_ARCHIVE_PATH):
+	@echo "   CURL $(notdir $@)"
 	curl -L $(TZDATA_URL) > $@
 
 $(BUILD)/tzdata/.extracted: $(TZDATA_ARCHIVE_PATH)
@@ -79,3 +82,6 @@ clean:
 	$(RM) -r $(BUILD) $(PREFIX)
 
 .PHONY: all clean calling_from_make
+
+# Don't echo commands unless the caller exports "V=1"
+${V}.SILENT:
