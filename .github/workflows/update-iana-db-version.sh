@@ -17,8 +17,5 @@ else
   git add mix.exs
   git commit -m "Update timezone database to $IANA_VERSION"
   git push -u origin outdated
-
-  if [[ $(gh pr list --state open --label "outdated check") == "" ]]; then
-    gh pr create --fill --label "outdated check"
-  fi
+  gh pr create --fill
 fi
