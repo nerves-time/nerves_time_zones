@@ -1,7 +1,7 @@
 defmodule NervesTimeZones.MixProject do
   use Mix.Project
 
-  @version "0.1.6"
+  @version "0.1.7"
   @source_url "https://github.com/nerves-time/nerves_time_zones"
   @tzdata_version "2021b"
   @tzdata_earliest_date to_string(System.os_time(:second) - 86400)

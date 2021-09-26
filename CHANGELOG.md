@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.7
+
+* Updates
+  * Update the IANA database to 2021b
+
 ## v0.1.6
 
 * Improvements
