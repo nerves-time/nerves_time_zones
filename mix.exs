@@ -3,7 +3,7 @@ defmodule NervesTimeZones.MixProject do
 
   @version "0.1.7"
   @source_url "https://github.com/nerves-time/nerves_time_zones"
-  @tzdata_version "2021b"
+  @tzdata_version "2021c"
   @tzdata_earliest_date to_string(System.os_time(:second) - 86400)
   @tzdata_latest_date to_string(System.os_time(:second) + 10 * 365 * 86400)
 
