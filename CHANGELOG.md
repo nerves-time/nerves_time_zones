@@ -3,6 +3,11 @@
 ## v0.1.8
 
 * Updates
+  * Update the IANA database to 2021d (Fiji!)
+
+## v0.1.8
+
+* Updates
   * Update the IANA database to 2021c (reverts the time zone removals in 2021b)
 
 ## v0.1.7
