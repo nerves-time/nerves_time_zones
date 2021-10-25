@@ -1,6 +1,11 @@
 # Changelog
 
-## v0.1.8
+## v0.1.10
+
+* Updates
+  * Update the IANA database to 2021e (Palestine DST change date)
+
+## v0.1.9
 
 * Updates
   * Update the IANA database to 2021d (Fiji!)
