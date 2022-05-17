@@ -18,11 +18,12 @@ defmodule NervesTimeZones.MixProject do
       source_url: @source_url,
       compilers: [:elixir_make | Mix.compilers()],
       make_env: fn ->
+        tzdata_version = Application.get_env(@app, :version, @tzdata_version)
         tzdata_earliest_date = Application.get_env(@app, :earliest_date, @tzdata_earliest_date)
         tzdata_latest_date = Application.get_env(@app, :latest_date, @tzdata_latest_date)
 
         %{
-          "TZDATA_VERSION" => @tzdata_version,
+          "TZDATA_VERSION" => tzdata_version,
           "TZDATA_EARLIEST_DATE" => to_string(tzdata_earliest_date),
           "TZDATA_LATEST_DATE" => to_string(tzdata_latest_date)
         }
