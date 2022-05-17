@@ -57,6 +57,16 @@ in the config like this:
 config :nerves_time_zones, default_time_zone: "Europe/Paris"
 ```
 
+NervesTimeZones maintains only a subset of the available timezone database information
+to save on file size. The default keeps `[-1 day, +10 years]` relative to the
+date of compilation. Both ends can be adjusted in the config like this:
+
+```elixir
+config :nerves_time_zones, 
+  earliest_date: DateTime.to_unix(~U[2022-05-17 12:02:32Z]),
+  latest_date: System.os_time(:second) + 5 * 365 * 86400
+```
+
 ## Database example
 
 If you just start up IEx, you may have seen something like this:

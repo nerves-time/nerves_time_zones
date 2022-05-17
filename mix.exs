@@ -1,26 +1,32 @@
 defmodule NervesTimeZones.MixProject do
   use Mix.Project
 
+  @app :nerves_time_zones
   @version "0.1.10"
   @source_url "https://github.com/nerves-time/nerves_time_zones"
   @tzdata_version "2021e"
-  @tzdata_earliest_date to_string(System.os_time(:second) - 86400)
-  @tzdata_latest_date to_string(System.os_time(:second) + 10 * 365 * 86400)
+  @tzdata_earliest_date System.os_time(:second) - 86400
+  @tzdata_latest_date System.os_time(:second) + 10 * 365 * 86400
 
   def project do
     [
-      app: :nerves_time_zones,
+      app: @app,
       version: @version,
       elixir: "~> 1.11",
       description: description(),
       package: package(),
       source_url: @source_url,
       compilers: [:elixir_make | Mix.compilers()],
-      make_env: %{
-        "TZDATA_VERSION" => @tzdata_version,
-        "TZDATA_EARLIEST_DATE" => @tzdata_earliest_date,
-        "TZDATA_LATEST_DATE" => @tzdata_latest_date
-      },
+      make_env: fn ->
+        tzdata_earliest_date = Application.get_env(@app, :earliest_date, @tzdata_earliest_date)
+        tzdata_latest_date = Application.get_env(@app, :latest_date, @tzdata_latest_date)
+
+        %{
+          "TZDATA_VERSION" => @tzdata_version,
+          "TZDATA_EARLIEST_DATE" => to_string(tzdata_earliest_date),
+          "TZDATA_LATEST_DATE" => to_string(tzdata_latest_date)
+        }
+      end,
       make_error_message: "",
       make_targets: ["all"],
       make_clean: ["clean"],
