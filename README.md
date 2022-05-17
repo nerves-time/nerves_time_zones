@@ -50,6 +50,13 @@ following in your project's `config.exs`:
 config :nerves_time_zones, data_dir: "./tmp/nerves_time_zones"
 ```
 
+The fetched IANA timezone db version defaults to `2021e`, which can be adjusted
+like this:
+
+```elixir
+config :nerves_time_zones, version: "2022a"
+```
+
 The default time zone is "Etc/UTC". If you want it to be something else, set it
 in the config like this:
 
