@@ -17,17 +17,7 @@ defmodule NervesTimeZones.MixProject do
       package: package(),
       source_url: @source_url,
       compilers: [:elixir_make | Mix.compilers()],
-      make_env: fn ->
-        tzdata_version = Application.get_env(@app, :version, @tzdata_version)
-        tzdata_earliest_date = Application.get_env(@app, :earliest_date, @tzdata_earliest_date)
-        tzdata_latest_date = Application.get_env(@app, :latest_date, @tzdata_latest_date)
-
-        %{
-          "TZDATA_VERSION" => tzdata_version,
-          "TZDATA_EARLIEST_DATE" => to_string(tzdata_earliest_date),
-          "TZDATA_LATEST_DATE" => to_string(tzdata_latest_date)
-        }
-      end,
+      make_env: &make_env/0,
       make_error_message: "",
       make_targets: ["all"],
       make_clean: ["clean"],
@@ -95,5 +85,27 @@ defmodule NervesTimeZones.MixProject do
       source_ref: "v#{@version}",
       source_url: @source_url
     ]
+  end
+
+  defp make_env() do
+    tzdata_version = Application.get_env(@app, :version, @tzdata_version)
+    tzdata_earliest_date = Application.get_env(@app, :earliest_date, @tzdata_earliest_date)
+    tzdata_latest_date = Application.get_env(@app, :latest_date, @tzdata_latest_date)
+
+    if tzdata_version != @tzdata_version do
+      msg = """
+      TZ database version #{tzdata_version} differs from the offically supported version #{@tzdata_version}
+
+      This is useful for unit and compatability tests, but should be avoided in production.
+      """
+
+      IO.warn(msg, [])
+    end
+
+    %{
+      "TZDATA_VERSION" => tzdata_version,
+      "TZDATA_EARLIEST_DATE" => to_string(tzdata_earliest_date),
+      "TZDATA_LATEST_DATE" => to_string(tzdata_latest_date)
+    }
   end
 end
