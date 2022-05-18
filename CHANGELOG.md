@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.0
+
+* Added
+  * IANA database version, earliest date, and latest date now configurable form
+    the application environment (thanks @LostKobrakai)
+
+* Updates
+  * Update the IANA database to 2022a
+
 ## v0.1.10
 
 * Updates
