@@ -3,7 +3,7 @@ defmodule NervesTimeZones.Persistence do
 
   @file_name "localtime"
 
-  @spec(save_time_zone(Path.t(), String.t()) :: :ok, {:error, any()})
+  @spec save_time_zone(Path.t(), String.t()) :: :ok | {:error, File.posix()}
   def save_time_zone(data_dir, time_zone) do
     path = Path.join(data_dir, @file_name)
 
