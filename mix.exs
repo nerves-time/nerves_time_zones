@@ -25,7 +25,7 @@ defmodule NervesTimeZones.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: [
-        flags: [:unmatched_returns, :error_handling, :race_conditions, :underspecs]
+        flags: [:unmatched_returns, :error_handling, :missing_return, :extra_return, :underspecs]
       ],
       preferred_cli_env: %{
         docs: :docs,
