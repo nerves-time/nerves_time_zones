@@ -4,7 +4,7 @@ defmodule NervesTimeZones.MixProject do
   @app :nerves_time_zones
   @version "0.2.0"
   @source_url "https://github.com/nerves-time/nerves_time_zones"
-  @tzdata_version "2022a"
+  @tzdata_version "2022b"
   @tzdata_earliest_date System.os_time(:second) - 86400
   @tzdata_latest_date System.os_time(:second) + 10 * 365 * 86400
 
