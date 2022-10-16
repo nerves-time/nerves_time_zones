@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.2
+
+* Updates
+  * Update the IANA database to 2022e
+
 ## v0.2.1
 
 * Updates
