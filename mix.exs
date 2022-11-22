@@ -56,11 +56,6 @@ defmodule NervesTimeZones.MixProject do
         "mix.exs",
         "README.md",
         "Makefile",
-        "tzcode/private.h",
-        "tzcode/README.md",
-        "tzcode/tzfile.h",
-        "tzcode/version",
-        "tzcode/zic.c",
         "tzdata.mk"
       ],
       licenses: ["Apache-2.0"],

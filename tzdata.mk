@@ -16,13 +16,26 @@ DL = dl
 TZDATA_NAME=tzdata$(TZDATA_VERSION)
 TZDATA_ARCHIVE_NAME=$(TZDATA_NAME).tar.gz
 TZDATA_ARCHIVE_PATH=$(abspath $(DL)/$(TZDATA_ARCHIVE_NAME))
-TZDATA_URL=https://data.iana.org/time-zones/releases/$(TZDATA_ARCHIVE_NAME)
+
+TZCODE_NAME=tzcode$(TZDATA_VERSION)
+TZCODE_ARCHIVE_NAME=$(TZCODE_NAME).tar.gz
+TZCODE_ARCHIVE_PATH=$(abspath $(DL)/$(TZCODE_ARCHIVE_NAME))
+
 ZIC_OPTIONS=-r @$(TZDATA_EARLIEST_DATE)/@$(TZDATA_LATEST_DATE)
 
 PREFIX = $(MIX_APP_PATH)/priv
 BUILD  = $(MIX_APP_PATH)/build
 CC_FOR_BUILD=cc
 TZVERSION = $(BUILD)/TZVERSION
+ZIC = $(BUILD)/$(TZCODE_NAME)/zic
+
+CFLAGS=
+
+ifeq ($(shell uname -s),Darwin)
+# Apparently using sys/random.h on MacOS requires more than zic.c
+# provides, so just disable it since its new to 2022f
+CFLAGS=-DHAVE_GETRANDOM=false
+endif
 
 calling_from_make:
 	mix compile
@@ -50,32 +63,37 @@ YDATA=          $(PRIMARY_YDATA) etcetera
 NDATA=          factory
 TDATA=          $(YDATA)
 
-tzcode/version.h: $(TZVERSION)
+$(BUILD)/$(TZCODE_NAME)/version.h: $(TZVERSION)
 	VERSION=`cat $(TZVERSION)` && printf '%s\n' \
 		'static char const PKGVERSION[]="($(PACKAGE)) ";' \
 		"static char const TZVERSION[]=\"$$VERSION\";" \
 		'static char const REPORT_BUGS_TO[]="$(BUGEMAIL)";' \
 		>$@.out
 	mv $@.out $@
-	$(RM) -r $(PREFIX)/zoneinfo
+	$(RM) -r $(PREFIX)/zoneinfo $(ZIC)
 
 ### End copied definitions
 
-$(BUILD)/zic: tzcode/zic.c tzcode/version.h
+$(ZIC): $(BUILD)/$(TZCODE_NAME)/.extracted $(BUILD)/$(TZCODE_NAME)/zic.c $(BUILD)/$(TZCODE_NAME)/version.h
 	@echo " HOSTCC $(notdir $@)"
-	$(CC_FOR_BUILD) -o $@ tzcode/zic.c
+	$(CC_FOR_BUILD) $(CFLAGS) -o $@ $(BUILD)/$(TZCODE_NAME)/zic.c
 
-$(PREFIX)/zoneinfo: $(BUILD)/zic $(BUILD)/$(TZDATA_NAME)/.extracted Makefile
+$(PREFIX)/zoneinfo: $(BUILD)/$(TZDATA_NAME)/.extracted $(ZIC) Makefile
 	@echo "    ZIC $(notdir $@)"
-	cd $(BUILD)/$(TZDATA_NAME) && $(BUILD)/zic -d $@ $(ZIC_OPTIONS) $(TDATA)
+	cd $(BUILD)/$(TZDATA_NAME) && $(ZIC) -d $@ $(ZIC_OPTIONS) $(TDATA)
 
-$(TZDATA_ARCHIVE_PATH): $(DL)
+$(TZDATA_ARCHIVE_PATH) $(TZCODE_ARCHIVE_PATH): $(DL)
 	@echo "   CURL $(notdir $@)"
-	curl -L $(TZDATA_URL) > $@
+	curl -L https://data.iana.org/time-zones/releases/$(notdir $@) > $@
 
 $(BUILD)/$(TZDATA_NAME)/.extracted: $(TZDATA_ARCHIVE_PATH)
-	mkdir -p $(BUILD)/$(TZDATA_NAME)
-	cd $(BUILD)/$(TZDATA_NAME) && tar xf $(TZDATA_ARCHIVE_PATH)
+	mkdir -p $(dir $@)
+	cd $(dir $@) && tar xf $(TZDATA_ARCHIVE_PATH)
+	touch $@
+
+$(BUILD)/$(TZCODE_NAME)/.extracted: $(TZCODE_ARCHIVE_PATH)
+	mkdir -p $(dir $@)
+	cd $(dir $@) && tar xf $<
 	touch $@
 
 $(PREFIX) $(BUILD) $(DL):
