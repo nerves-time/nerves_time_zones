@@ -28,3 +28,4 @@ nerves_time_zones-*.tar
 
 /tzdata*.tar.gz
 /tzcode/version.h
+/dl
