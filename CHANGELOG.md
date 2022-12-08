@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.3.0
+
+This release changes how dates are returned that happen before the earliest date
+in the time zone database. This is due to an update to IANA's zic compiler.
+Previously the earliest time zone would be extended to dates before the
+beginning of the database. This was wrong, though, since there could be any
+number of time zone changes. The new way is to return UTC and the unknown time
+zone, `-00`.
+
+If you have dates in your regression tests, you probably will need to update
+them if they're processed by nerves_time_zones.
+
+* Updates
+  * Update the IANA database and zic compiler to 2022g
+  * Fix the earliest database date to 2022/1/1 so regression tests can have
+    fixed dates without breaking independent of a nerves_time_zones version bump.
+
 ## v0.2.2
 
 * Updates
@@ -54,7 +71,7 @@
 ## v0.1.4
 
 * Bug fixes
-  * Setting the default timezone didn't work on Nerves. Thanks to @pojiro for
+  * Setting the default time zone didn't work on Nerves. Thanks to @pojiro for
     fixing this.
 
 ## v0.1.3
