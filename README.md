@@ -50,11 +50,11 @@ following in your project's `config.exs`:
 config :nerves_time_zones, data_dir: "./tmp/nerves_time_zones"
 ```
 
-The fetched IANA timezone db version defaults to `2022a`, which can be adjusted
+The fetched IANA timezone db version defaults to `2022g`, which can be adjusted
 like this:
 
 ```elixir
-config :nerves_time_zones, version: "2021e"
+config :nerves_time_zones, version: "2025a"
 ```
 
 The default time zone is "Etc/UTC". If you want it to be something else, set it
@@ -65,11 +65,11 @@ config :nerves_time_zones, default_time_zone: "Europe/Paris"
 ```
 
 NervesTimeZones maintains only a subset of the available timezone database information
-to save on file size. The default keeps `[-1 day, +10 years]` relative to the
+to save on file size. The default keeps `[2022-01-01, +10 years]` relative to the
 date of compilation. Both ends can be adjusted in the config like this:
 
 ```elixir
-config :nerves_time_zones, 
+config :nerves_time_zones,
   earliest_date: DateTime.to_unix(~U[2022-05-17 12:02:32Z]),
   latest_date: System.os_time(:second) + 5 * 365 * 86400
 ```
