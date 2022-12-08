@@ -1,4 +1,4 @@
-ZIC(8)                      System Manager's Manual                     ZIC(8)
+zic(8)                      System Manager's Manual                     zic(8)
 
 NAME
        zic - timezone compiler
@@ -8,8 +8,8 @@ SYNOPSIS
 
 DESCRIPTION
        The zic program reads text from the file(s) named on the command line
-       and creates the time conversion information files specified in this
-       input.  If a filename is "-", standard input is read.
+       and creates the timezone information format (TZif) files specified in
+       this input.  If a filename is "-", standard input is read.
 
 OPTIONS
        --version
@@ -61,17 +61,31 @@ OPTIONS
               If timezone is -, any already-existing link is removed.
 
        -r [@lo][/@hi]
-              Reduce the size of output files by limiting their applicability
-              to timestamps in the range from lo (inclusive) to hi
-              (exclusive), where lo and hi are possibly-signed decimal counts
-              of seconds since the Epoch (1970-01-01 00:00:00 UTC).  Omitted
-              counts default to extreme values.  For example, "zic -r @0"
-              omits data intended for negative timestamps (i.e., before the
-              Epoch), and "zic -r @0/@2147483648" outputs data intended only
-              for nonnegative timestamps that fit into 31-bit signed integers.
-              On platforms with GNU date, "zic -r @$(date +%s)" omits data
-              intended for past timestamps.  Also see the -b slim option for
-              another way to shrink output size.
+              Limit the applicability of output files to timestamps in the
+              range from lo (inclusive) to hi (exclusive), where lo and hi are
+              possibly-signed decimal counts of seconds since the Epoch
+              (1970-01-01 00:00:00 UTC).  Omitted counts default to extreme
+              values.  The output files use UT offset 0 and abbreviation "-00"
+              in place of the omitted timestamp data.  For example, "zic -r
+              @0" omits data intended for negative timestamps (i.e., before
+              the Epoch), and "zic -r @0/@2147483648" outputs data intended
+              only for nonnegative timestamps that fit into 31-bit signed
+              integers.  On platforms with GNU date, "zic -r @$(date +%s)"
+              omits data intended for past timestamps.  Although this option
+              typically reduces the output file's size, the size can increase
+              due to the need to represent the timestamp range boundaries,
+              particularly if hi causes a TZif file to contain explicit
+              entries for pre-hi transitions rather than concisely
+              representing them with an extended POSIX TZ string.  Also see
+              the -b slim option for another way to shrink output size.
+
+       -R @hi Generate redundant trailing explicit transitions for timestamps
+              that occur less than hi seconds since the Epoch, even though the
+              transitions could be more concisely represented via the extended
+              POSIX TZ string.  This option does not affect the represented
+              timestamps.  Although it accommodates nonstandard TZif readers
+              that ignore the extended POSIX TZ string, it increases the size
+              of the altered output files.
 
        -t file
               When creating local time information, put the configuration link
@@ -79,7 +93,8 @@ OPTIONS
 
        -v     Be more verbose, and complain about the following situations:
 
-              The input specifies a link to a link.
+              The input specifies a link to a link, something not supported by
+              some older parsers, including zic itself through release 2022e.
 
               A year that appears in a data file is outside the range of
               representable years.
@@ -114,6 +129,11 @@ OPTIONS
               compatibility issues affect only timestamps before 1970 or after
               the start of 2038.
 
+              The output contains a truncated leap second table, which can
+              cause some older TZif readers to misbehave.  This can occur if
+              the -L option is used, and either an Expires line is present or
+              the -r option is also used.
+
               The output file contains more than 1200 transitions, which may
               be mishandled by some clients.  The current reference client
               supports at most 2000 transitions; pre-2014 versions of the
@@ -133,15 +153,15 @@ FILES
 
        Input files should be text files, that is, they should be a series of
        zero or more lines, each ending in a newline byte and containing at
-       most 511 bytes, and without any NUL bytes.  The input text's encoding
-       is typically UTF-8 or ASCII; it should have a unibyte representation
-       for the POSIX Portable Character Set (PPCS) <http://pubs.opengroup.org/
-       onlinepubs/9699919799/basedefs/V1_chap06.html> and the encoding's non-
-       unibyte characters should consist entirely of non-PPCS bytes.  Non-PPCS
-       characters typically occur only in comments: although output file names
-       and time zone abbreviations can contain nearly any character, other
-       software will work better if these are limited to the restricted syntax
-       described under the -v option.
+       most 2048 bytes counting the newline, and without any NUL bytes.  The
+       input text's encoding is typically UTF-8 or ASCII; it should have a
+       unibyte representation for the POSIX Portable Character Set (PPCS)
+       <https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap06
+       .html> and the encoding's non-unibyte characters should consist
+       entirely of non-PPCS bytes.  Non-PPCS characters typically occur only
+       in comments: although output file names and time zone abbreviations can
+       contain nearly any character, other software will work better if these
+       are limited to the restricted syntax described under the -v option.
 
        Input lines are made up of fields.  Fields are separated from one
        another by one or more white space characters.  The white space
@@ -284,16 +304,17 @@ FILES
        STDOFF
              The amount of time to add to UT to get standard time, without any
              adjustment for daylight saving.  This field has the same format
-             as the AT and SAVE fields of rule lines; begin the field with a
-             minus sign if time must be subtracted from UT.
+             as the AT and SAVE fields of rule lines, except without suffix
+             letters; begin the field with a minus sign if time must be
+             subtracted from UT.
 
        RULES The name of the rules that apply in the timezone or,
              alternatively, a field in the same format as a rule-line SAVE
-             column, giving of the amount of time to be added to local
-             standard time effect, and whether the resulting time is standard
-             or daylight saving.  If this field is - then standard time always
-             applies.  When an amount of time is given, only the sum of
-             standard time and this amount matters.
+             column, giving the amount of time to be added to local standard
+             time and whether the resulting time is standard or daylight
+             saving.  If this field is - then standard time always applies.
+             When an amount of time is given, only the sum of standard time
+             and this amount matters.
 
        FORMAT
              The format for time zone abbreviations.  The pair of characters
@@ -305,7 +326,9 @@ FILES
              seconds east (+) or west (-) of UT.  Alternatively, a slash (/)
              separates standard and daylight abbreviations.  To conform to
              POSIX, a time zone abbreviation should contain only alphanumeric
-             ASCII characters, "+" and "-".
+             ASCII characters, "+" and "-".  By convention, the time zone
+             abbreviation "-00" is a placeholder that means local time is
+             unspecified.
 
        UNTIL The time at which the UT offset or the rule(s) change for a
              location.  It takes the form of one to four fields YEAR [MONTH
@@ -364,14 +387,24 @@ FILES
 
             Link  Europe/Istanbul  Asia/Istanbul
 
-       The TARGET field should appear as the NAME field in some zone line.
-       The LINK-NAME field is used as an alternative name for that zone; it
-       has the same syntax as a zone line's NAME field.
+       The TARGET field should appear as the NAME field in some zone line or
+       as the LINK-NAME field in some link line.  The LINK-NAME field is used
+       as an alternative name for that zone; it has the same syntax as a zone
+       line's NAME field.  Links can chain together, although the behavior is
+       unspecified if a chain of one or more links does not terminate in a
+       Zone name.  A link line can appear before the line that defines the
+       link target.  For example:
+
+         Link  Greenwich  G_M_T
+         Link  Etc/GMT    Greenwich
+         Zone  Etc/GMT  0  -  GMT
+
+       The two links are chained together, and G_M_T, Greenwich, and Etc/GMT
+       all name the same zone.
 
        Except for continuation lines, lines may appear in any order in the
        input.  However, the behavior is unspecified if multiple zone or link
-       lines define the same name, or if the source of one link line is the
-       target of another.
+       lines define the same name.
 
        The file that describes leap seconds can have leap lines and an
        expiration line.  Leap lines have the following form:
@@ -390,6 +423,15 @@ FILES
        second time given by the other fields should be interpreted as local
        (wall clock) time.
 
+       Rolling leap seconds were implemented back when it was not clear
+       whether common practice was rolling or stationary, with concerns that
+       one would see Times Square ball drops where there'd be a "3... 2...
+       1... leap... Happy New Year" countdown, placing the leap second at
+       midnight New York time rather than midnight UTC.  However, this
+       countdown style does not seem to have caught on, which means rolling
+       leap seconds are not used in practice; also, they are not supported if
+       the -r option is used.
+
        The expiration line, if present, has the form:
 
             Expires  YEAR  MONTH  DAY  HH:MM:SS
@@ -399,18 +441,11 @@ FILES
             Expires  2020  Dec    28   00:00:00
 
        The YEAR, MONTH, DAY, and HH:MM:SS fields give the expiration timestamp
-       in UTC for the leap second table; zic outputs this expiration timestamp
-       by truncating the end of the output file to the timestamp.  If there is
-       no expiration line, zic also accepts a comment "#expires E ..." where E
-       is the expiration timestamp as a decimal integer count of seconds since
-       the Epoch, not counting leap seconds.  However, the "#expires" comment
-       is an obsolescent feature, and the leap second file should use an
-       expiration line instead of relying on a comment.
+       in UTC for the leap second table.
 
 EXTENDED EXAMPLE
        Here is an extended example of zic input, intended to illustrate many
-       of its features.  In this example, the EU rules are for the European
-       Union and for its predecessor organization, the European Communities.
+       of its features.
 
          # Rule  NAME  FROM  TO    -  IN   ON       AT    SAVE  LETTER/S
          Rule    Swiss 1941  1942  -  May  Mon>=1   1:00  1:00  S
@@ -430,15 +465,17 @@ EXTENDED EXAMPLE
 
          Link    Europe/Zurich  Europe/Vaduz
 
-       In this example, the timezone is named Europe/Zurich but it has an
-       alias as Europe/Vaduz.  This example says that Zurich was 34 minutes
-       and 8 seconds east of UT until 1853-07-16 at 00:00, when the legal
-       offset was changed to 7<degree>26'22.50'', which works out to
-       0:29:45.50; zic treats this by rounding it to 0:29:46.  After
-       1894-06-01 at 00:00 the UT offset became one hour and Swiss daylight
-       saving rules (defined with lines beginning with "Rule Swiss") apply.
-       From 1981 to the present, EU daylight saving rules have applied, and
-       the UTC offset has remained at one hour.
+       In this example, the EU rules are for the European Union and for its
+       predecessor organization, the European Communities.  The timezone is
+       named Europe/Zurich and it has the alias Europe/Vaduz.  This example
+       says that Zurich was 34 minutes and 8 seconds east of UT until
+       1853-07-16 at 00:00, when the legal offset was changed to 7 degrees 26
+       minutes 22.50 seconds, which works out to 0:29:45.50; zic treats this
+       by rounding it to 0:29:46.  After 1894-06-01 at 00:00 the UT offset
+       became one hour and Swiss daylight saving rules (defined with lines
+       beginning with "Rule Swiss") apply.  From 1981 to the present, EU
+       daylight saving rules have applied, and the UTC offset has remained at
+       one hour.
 
        In 1941 and 1942, daylight saving time applied from the first Monday in
        May at 01:00 to the first Monday in October at 02:00.  The pre-1981 EU
@@ -476,4 +513,4 @@ NOTES
 SEE ALSO
        tzfile(5), zdump(8)
 
-                                                                        ZIC(8)
+                                                                        zic(8)

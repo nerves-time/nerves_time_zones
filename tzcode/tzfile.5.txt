@@ -17,8 +17,8 @@ DESCRIPTION
        * The magic four-byte ASCII sequence "TZif" identifies the file as a
          timezone information file.
 
-       * A byte identifying the version of the file's format (as of 2017,
-         either an ASCII NUL, or "2", or "3").
+       * A byte identifying the version of the file's format (as of 2021,
+         either an ASCII NUL, "2", "3", or "4").
 
        * Fifteen bytes containing zeros reserved for future use.
 
@@ -77,21 +77,40 @@ DESCRIPTION
          tt_utoff gives the number of seconds to be added to UT, tt_isdst
          tells whether tm_isdst should be set by localtime(3) and tt_desigidx
          serves as an index into the array of time zone abbreviation bytes
-         that follow the ttinfo structure(s) in the file.  The tt_utoff value
-         is never equal to -2**31, to let 32-bit clients negate it without
-         overflow.  Also, in realistic applications tt_utoff is in the range
-         [-89999, 93599] (i.e., more than -25 hours and less than 26 hours);
-         this allows easy support by implementations that already support the
-         POSIX-required range [-24:59:59, 25:59:59].
+         that follow the ttinfo entries in the file; if the designated string
+         is "-00", the ttinfo entry is a placeholder indicating that local
+         time is unspecified.  The tt_utoff value is never equal to -2**31, to
+         let 32-bit clients negate it without overflow.  Also, in realistic
+         applications tt_utoff is in the range [-89999, 93599] (i.e., more
+         than -25 hours and less than 26 hours); this allows easy support by
+         implementations that already support the POSIX-required range
+         [-24:59:59, 25:59:59].
+
+       * tzh_charcnt bytes that represent time zone designations, which are
+         null-terminated byte strings, each indexed by the tt_desigidx values
+         mentioned above.  The byte strings can overlap if one is a suffix of
+         the other.  The encoding of these strings is not specified.
 
        * tzh_leapcnt pairs of four-byte values, written in network byte order;
          the first value of each pair gives the nonnegative time (as returned
-         by time(2)) at which a leap second occurs; the second is a signed
-         integer specifying the total number of leap seconds to be applied
+         by time(2)) at which a leap second occurs or at which the leap second
+         table expires; the second is a signed integer specifying the
+         correction, which is the total number of leap seconds to be applied
          during the time period starting at the given time.  The pairs of
-         values are sorted in ascending order by time.  Each transition is for
-         one leap second, either positive or negative; transitions always
-         separated by at least 28 days minus 1 second.
+         values are sorted in strictly ascending order by time.  Each pair
+         denotes one leap second, either positive or negative, except that if
+         the last pair has the same correction as the previous one, the last
+         pair denotes the leap second table's expiration time.  Each leap
+         second is at the end of a UTC calendar month.  The first leap second
+         has a nonnegative occurrence time, and is a positive leap second if
+         and only if its correction is positive; the correction for each leap
+         second after the first differs from the previous leap second by
+         either 1 for a positive leap second, or -1 for a negative leap
+         second.  If the leap second table is empty, the leap-second
+         correction is zero for all timestamps; otherwise, for timestamps
+         before the first occurrence time, the leap-second correction is zero
+         if the first pair's correction is 1 or -1, and is unspecified
+         otherwise (which can happen only in files truncated at the start).
 
        * tzh_ttisstdcnt standard/wall indicators, each stored as a one-byte
          boolean; they tell whether the transition times associated with local
@@ -131,15 +150,15 @@ DESCRIPTION
        string for use in handling instants after the last transition time
        stored in the file or for all instants if the file has no transitions.
        The POSIX-style TZ string is empty (i.e., nothing between the newlines)
-       if there is no POSIX representation for such instants.  If nonempty,
-       the POSIX-style TZ string must agree with the local time type after the
-       last transition time if present in the eight-byte data; for example,
-       given the string "WET0WEST,M3.5.0,M10.5.0/3" then if a last transition
-       time is in July, the transition's local time type must specify a
-       daylight-saving time abbreviated "WEST" that is one hour east of UT.
-       Also, if there is at least one transition, time type 0 is associated
-       with the time period from the indefinite past up to but not including
-       the earliest transition time.
+       if there is no POSIX-style representation for such instants.  If
+       nonempty, the POSIX-style TZ string must agree with the local time type
+       after the last transition time if present in the eight-byte data; for
+       example, given the string "WET0WEST,M3.5.0,M10.5.0/3" then if a last
+       transition time is in July, the transition's local time type must
+       specify a daylight-saving time abbreviated "WEST" that is one hour east
+       of UT.  Also, if there is at least one transition, time type 0 is
+       associated with the time period from the indefinite past up to but not
+       including the earliest transition time.
 
    Version 3 format
        For version-3-format timezone files, the POSIX-TZ-style string may use
@@ -150,37 +169,64 @@ DESCRIPTION
        if it starts January 1 at 00:00 and ends December 31 at 24:00 plus the
        difference between daylight saving and standard time.
 
+   Version 4 format
+       For version-4-format TZif files, the first leap second record can have
+       a correction that is neither +1 nor -1, to represent truncation of the
+       TZif file at the start.  Also, if two or more leap second transitions
+       are present and the last entry's correction equals the previous one,
+       the last entry denotes the expiration of the leap second table instead
+       of a leap second; timestamps after this expiration are unreliable in
+       that future releases will likely add leap second entries after the
+       expiration, and the added leap seconds will change how post-expiration
+       timestamps are treated.
+
    Interoperability considerations
        Future changes to the format may append more data.
 
-       Version 1 files are considered a legacy format and should be avoided,
-       as they do not support transition times after the year 2038.  Readers
-       that only understand Version 1 must ignore any data that extends beyond
-       the calculated end of the version 1 data block.
+       Version 1 files are considered a legacy format and should not be
+       generated, as they do not support transition times after the year 2038.
+       Readers that understand only Version 1 must ignore any data that
+       extends beyond the calculated end of the version 1 data block.
 
-       Writers should generate a version 3 file if TZ string extensions are
-       necessary to accurately model transition times.  Otherwise, version 2
-       files should be generated.
+       Other than version 1, writers should generate the lowest version number
+       needed by a file's data.  For example, a writer should generate a
+       version 4 file only if its leap second table either expires or is
+       truncated at the start.  Likewise, a writer not generating a version 4
+       file should generate a version 3 file only if TZ string extensions are
+       necessary to accurately model transition times.
 
        The sequence of time changes defined by the version 1 header and data
-       block should be a contiguous subsequence of the time changes defined by
-       the version 2+ header and data block, and by the footer.  This
+       block should be a contiguous sub-sequence of the time changes defined
+       by the version 2+ header and data block, and by the footer.  This
        guideline helps obsolescent version 1 readers agree with current
-       readers about timestamps within the contiguous subsequence.  It also
+       readers about timestamps within the contiguous sub-sequence.  It also
        lets writers not supporting obsolescent readers use a tzh_timecnt of
        zero in the version 1 data block to save space.
+
+       When a TZif file contains a leap second table expiration time, TZif
+       readers should either refuse to process post-expiration timestamps, or
+       process them as if the expiration time did not exist (possibly with an
+       error indication).
 
        Time zone designations should consist of at least three (3) and no more
        than six (6) ASCII characters from the set of alphanumerics, "-", and
        "+".  This is for compatibility with POSIX requirements for time zone
        abbreviations.
 
-       When reading a version 2 or 3 file, readers should ignore the version 1
-       header and data block except for the purpose of skipping over them.
+       When reading a version 2 or higher file, readers should ignore the
+       version 1 header and data block except for the purpose of skipping over
+       them.
 
        Readers should calculate the total lengths of the headers and data
        blocks and check that they all fit within the actual file size, as part
        of a validity check for the file.
+
+       When a positive leap second occurs, readers should append an extra
+       second to the local minute containing the second just before the leap
+       second.  If this occurs when the UTC offset is not a multiple of 60
+       seconds, the leap second occurs earlier than the last second of the
+       local minute and the minute's remaining local seconds are numbered
+       through 60 instead of the usual 59; the UTC offset is unaffected.
 
    Common interoperability issues
        This section documents common problems in reading or writing TZif
@@ -200,7 +246,7 @@ DESCRIPTION
        has been that a reader can successfully use a TZif file even if the
        file is of a later TZif version than what the reader was designed for.
        When complete compatibility was not achieved, an attempt was made to
-       limit glitches to rarely-used timestamps, and to allow simple partial
+       limit glitches to rarely used timestamps and allow simple partial
        workarounds in writers designed to generate new-version data useful
        even for older-version readers.  This section attempts to document
        these compatibility issues and workarounds, as well as to document
@@ -214,16 +260,24 @@ DESCRIPTION
          even if the reader's native timestamps have only 32 bits.
 
        * Some readers designed for version 2 might mishandle timestamps after
-         a version 3 file's last transition, because they cannot parse
-         extensions to POSIX in the TZ-like string.  As a partial workaround,
-         a writer can output more transitions than necessary, so that only
-         far-future timestamps are mishandled by version 2 readers.
+         a version 3 or higher file's last transition, because they cannot
+         parse extensions to POSIX in the TZ-like string.  As a partial
+         workaround, a writer can output more transitions than necessary, so
+         that only far-future timestamps are mishandled by version 2 readers.
 
        * Some readers designed for version 2 do not support permanent daylight
-         saving time, e.g., a TZ string "EST5EDT,0/0,J365/25" denoting
-         permanent Eastern Daylight Time (-04).  As a partial workaround, a
-         writer can substitute standard time for the next time zone east,
-         e.g., "AST4" for permanent Atlantic Standard Time (-04).
+         saving time with transitions after 24:00 - e.g., a TZ string
+         "EST5EDT,0/0,J365/25" denoting permanent Eastern Daylight Time (-04).
+         As a workaround, a writer can substitute standard time for two time
+         zones east, e.g., "XXX3EDT4,0/0,J365/23" for a time zone with a
+         never-used standard time (XXX, -03) and negative daylight saving time
+         (EDT, -04) all year.  Alternatively, as a partial workaround a writer
+         can substitute standard time for the next time zone east - e.g.,
+         "AST4" for permanent Atlantic Standard Time (-04).
+
+       * Some readers designed for version 2 or 3, and that require strict
+         conformance to RFC 8536, reject version 4 files whose leap second
+         tables are truncated at the start or that end in expiration times.
 
        * Some readers ignore the footer, and instead predict future timestamps
          from the time type of the last transition.  As a partial workaround,
@@ -269,6 +323,16 @@ DESCRIPTION
          part of the year uses daylight saving time, it records UT offsets and
          time zone abbreviations correctly.
 
+       * Some readers generate ambiguous timestamps for positive leap seconds
+         that occur when the UTC offset is not a multiple of 60 seconds.  For
+         example, in a timezone with UTC offset +01:23:45 and with a positive
+         leap second 78796801 (1972-06-30 23:59:60 UTC), some readers will map
+         both 78796800 and 78796801 to 01:23:45 local time the next day
+         instead of mapping the latter to 01:23:46, and they will map 78796815
+         to 01:23:59 instead of to 01:23:60.  This has not yet been a
+         practical problem, since no civil authority has observed such UTC
+         offsets since leap seconds were introduced in 1972.
+
        Some interoperability problems are reader bugs that are listed here
        mostly as warnings to developers of readers.
 
@@ -298,7 +362,8 @@ SEE ALSO
        time(2), localtime(3), tzset(3), tzselect(8), zdump(8), zic(8).
 
        Olson A, Eggert P, Murchison K. The Time Zone Information Format
-       (TZif).  2019 Feb.  Internet RFC 8536 <https://www.rfc-editor.org/info/
-       rfc8536> doi:10.17487/RFC8536 <https://doi.org/10.17487/RFC8536>.
+       (TZif).  2019 Feb.  Internet RFC 8536 <https://datatracker.ietf.org/
+       doc/html/rfc8536> doi:10.17487/RFC8536 <https://doi.org/10.17487/
+       RFC8536>.
 
                                                                      TZFILE(5)
