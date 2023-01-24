@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.1
+
+* Fixes
+  * Some build machines incorrectly detected gettext support when building zic.
+    Since gettext isn't needed, force it off to avoid the possibility of a build
+    error.
+
 ## v0.3.0
 
 This release changes how dates are returned that happen before the earliest date
