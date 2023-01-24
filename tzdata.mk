@@ -60,7 +60,7 @@ tzcode/version.h: tzcode/version
 
 $(BUILD)/zic: tzcode/zic.c tzcode/version.h
 	@echo " HOSTCC $(notdir $@)"
-	$(CC_FOR_BUILD) -o $@ tzcode/zic.c
+	$(CC_FOR_BUILD) -DHAVE_GETTEXT=0 -o $@ tzcode/zic.c
 
 $(PREFIX)/zoneinfo: $(BUILD)/zic $(BUILD)/tzdata/.extracted Makefile
 	@echo "    ZIC $(notdir $@)"
