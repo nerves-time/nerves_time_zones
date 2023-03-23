@@ -33,7 +33,7 @@ defmodule NervesTimeZones.Server do
     if Zoneinfo.valid_time_zone?(zone) do
       check_args(rest, [arg | good_args])
     else
-      Logger.warn(
+      Logger.warning(
         "Default time zone `#{zone}` isn't valid. Using #{@default_time_zone} instead. Call `NervesTimeZones.time_zones/0` for list."
       )
 
@@ -134,7 +134,7 @@ defmodule NervesTimeZones.Server do
         :ok
 
       other ->
-        Logger.warn("""
+        Logger.warning("""
         nerves_time_zones requires that the Calendar TimeZoneDatabase be unset or set to Zoneinfo.TimeZoneDatabase.
         Something else set it to #{inspect(other)}. Check your config.exs and remove another setting if there.
         """)
