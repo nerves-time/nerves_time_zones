@@ -36,7 +36,7 @@ First, add `nerves_time_zones` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:nerves_time_zones, "~> 0.1.2"}
+    {:nerves_time_zones, "~> 0.3.2"}
   ]
 end
 ```
