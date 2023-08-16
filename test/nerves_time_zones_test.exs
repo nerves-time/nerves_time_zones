@@ -137,4 +137,17 @@ defmodule NervesTimeZonesTest do
     assert {:ok, expected} ==
              DateTime.shift_zone(~U[2022-03-09 00:00:00Z], "America/Phoenix")
   end
+
+  test "requesting timezones when not started" do
+    # Stop the app to simulate the case where a request is made before
+    # the app is started.
+    capture_log(fn -> Application.stop(:nerves_time_zones) end)
+
+    expected = DateTime.from_naive!(~N[2022-03-08 17:00:00], "America/Phoenix")
+
+    assert {:ok, expected} ==
+             DateTime.shift_zone(~U[2022-03-09 00:00:00Z], "America/Phoenix")
+
+    Application.start(:nerves_time_zones)
+  end
 end
