@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.3
+
+* Updates
+  * Update the IANA database to 2023c
+  * Update cached tzcode to 2023c to fix compilation errors with GCC 13.2
+
 ## v0.3.2
 
 * Updates
