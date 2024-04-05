@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.4
+
+* Updates
+  * Update the IANA database to 2024a
+  * Use the `:sync` flag when persisting time zone setting updates to avoid them
+    getting lost due to removing the power before the filesystem has been
+    written.
+
 ## v0.3.3
 
 * Updates
