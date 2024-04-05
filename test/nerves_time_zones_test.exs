@@ -19,19 +19,33 @@ defmodule NervesTimeZonesTest do
 
     test "save and restore" do
       :ok = NervesTimeZones.set_time_zone("America/New_York")
-      capture_log(fn -> Application.stop(:nerves_time_zones) end)
-
-      Application.start(:nerves_time_zones)
+      restart_app()
       assert NervesTimeZones.get_time_zone() == "America/New_York"
+    end
+
+    test "save fails" do
+      old_path = Application.get_env(:nerves_time_zones, :data_dir)
+      Application.put_env(:nerves_time_zones, :data_dir, "/proc/place/that/fails")
+      restart_app()
+
+      log =
+        capture_log(fn ->
+          {:error, :enoent} = NervesTimeZones.set_time_zone("America/New_York")
+        end)
+
+      Application.put_env(:nerves_time_zones, :data_dir, old_path)
+      restart_app()
+
+      assert log =~ "Failed to save time zone"
     end
 
     test "default is UTC" do
       # Clear out the time zone file
       NervesTimeZones.reset_time_zone()
-      capture_log(fn -> Application.stop(:nerves_time_zones) end)
 
       # This should be a fresh start
-      Application.start(:nerves_time_zones)
+      restart_app()
+
       assert NervesTimeZones.get_time_zone() == "Etc/UTC"
     end
 
@@ -56,8 +70,7 @@ defmodule NervesTimeZonesTest do
 
       # Restore the default for the next tests
       :application.unset_env(:nerves_time_zones, :default_time_zone)
-      capture_log(fn -> Application.stop(:nerves_time_zones) end)
-      Application.start(:nerves_time_zones)
+      restart_app()
     end
 
     test "setting invalid default time zones logs a warning" do
@@ -75,8 +88,7 @@ defmodule NervesTimeZonesTest do
 
       # Restore the default
       :application.unset_env(:nerves_time_zones, :default_time_zone)
-      capture_log(fn -> Application.stop(:nerves_time_zones) end)
-      Application.start(:nerves_time_zones)
+      restart_app()
     end
   end
 
@@ -148,6 +160,11 @@ defmodule NervesTimeZonesTest do
     assert {:ok, expected} ==
              DateTime.shift_zone(~U[2022-03-09 00:00:00Z], "America/Phoenix")
 
+    Application.start(:nerves_time_zones)
+  end
+
+  defp restart_app() do
+    capture_log(fn -> Application.stop(:nerves_time_zones) end)
     Application.start(:nerves_time_zones)
   end
 end

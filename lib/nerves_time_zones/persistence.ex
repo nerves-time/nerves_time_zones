@@ -1,14 +1,24 @@
 defmodule NervesTimeZones.Persistence do
   @moduledoc false
 
+  require Logger
+
   @file_name "localtime"
 
   @spec save_time_zone(Path.t(), String.t()) :: :ok | {:error, File.posix()}
   def save_time_zone(data_dir, time_zone) do
     path = Path.join(data_dir, @file_name)
 
-    with :ok <- File.mkdir_p(data_dir) do
-      File.write(path, time_zone)
+    with :ok <- File.mkdir_p(data_dir),
+         :ok <- File.write(path, time_zone, [:sync]) do
+      :ok
+    else
+      {:error, reason} = error ->
+        Logger.error(
+          "Failed to save time zone, #{inspect(time_zone)}, to #{path}: #{inspect(reason)}"
+        )
+
+        error
     end
   end
 
