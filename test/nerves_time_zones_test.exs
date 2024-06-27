@@ -106,15 +106,50 @@ defmodule NervesTimeZonesTest do
     refute NervesTimeZones.valid_time_zone?("")
   end
 
-  test "time_zones/0" do
-    tz_list = NervesTimeZones.time_zones()
+  describe "time_zones/0" do
+    test "main us time zones exist" do
+      tz_list = NervesTimeZones.time_zones()
+      assert "America/New_York" in tz_list
+      assert "America/Chicago" in tz_list
+      assert "America/Denver" in tz_list
+      assert "America/Phoenix" in tz_list
+      assert "America/Los_Angeles" in tz_list
+      assert "Pacific/Honolulu" in tz_list
+    end
 
-    # This probably changes with tzdata releases, but if it's not in this
-    # range, it would be good to double check the database generation.
-    assert_in_delta length(tz_list), 352, 10
+    test "backwards-compatible time zones exist" do
+      tz_list = NervesTimeZones.time_zones()
+      assert "Europe/Amsterdam" in tz_list
+      assert "America/Indiana/Indianapolis" in tz_list
+    end
 
-    assert "Africa/Nairobi" in tz_list
-    refute "" in tz_list
+    test "each continent has a time zone that exists" do
+      tz_list = NervesTimeZones.time_zones()
+      assert "Africa/Nairobi" in tz_list
+      assert "America/New_York" in tz_list
+      assert "Asia/Tokyo" in tz_list
+      assert "Europe/Berlin" in tz_list
+      assert "Pacific/Honolulu" in tz_list
+      assert "Antarctica/McMurdo" in tz_list
+      assert "Arctic/Longyearbyen" in tz_list
+      assert "Australia/Melbourne" in tz_list
+    end
+
+    test "all non-empty strings" do
+      tz_list = NervesTimeZones.time_zones()
+      assert Enum.all?(tz_list, &is_binary/1)
+      refute "" in tz_list
+    end
+
+    test "time zone count is close" do
+      tz_list = NervesTimeZones.time_zones()
+
+      # This probably changes with tzdata releases, but if it's not in this
+      # range, it would be good to double check the database generation.
+      assert_in_delta length(tz_list), 596, 10
+
+      refute "" in tz_list
+    end
   end
 
   test "sets Calendar TimeZoneDatabase" do
