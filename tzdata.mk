@@ -46,7 +46,7 @@ PRIMARY_YDATA=  africa antarctica asia australasia \
                 europe northamerica southamerica
 YDATA=          $(PRIMARY_YDATA) etcetera
 NDATA=          factory
-TDATA=          $(YDATA)
+TDATA=          $(YDATA) $(BACKWARD)
 
 tzcode/version.h: tzcode/version
 	VERSION=`cat tzcode/version` && printf '%s\n' \
