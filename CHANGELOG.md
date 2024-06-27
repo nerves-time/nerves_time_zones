@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.3.5
+
+* Updates
+  * Include backwards compatibility time zones. Based on feedback, these are in
+    such wide use that it's unexpected when they don't exist. This increases the
+    amount of data saved, but if you're using a deduplicating filesystem like
+    SquashFS with Nerves, it's very minimal.
+
 ## v0.3.4
 
 * Updates
