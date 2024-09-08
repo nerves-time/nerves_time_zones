@@ -48,6 +48,36 @@ YDATA=          $(PRIMARY_YDATA) etcetera
 NDATA=          factory
 TDATA=          $(YDATA) $(BACKWARD)
 
+# Installation locations.
+#
+# The defaults are suitable for Debian, except that if REDO is
+# posix_right or right_posix then files that Debian puts under
+# /usr/share/zoneinfo/posix and /usr/share/zoneinfo/right are instead
+# put under /usr/share/zoneinfo-posix and /usr/share/zoneinfo-leaps,
+# respectively.  Problems with the Debian approach are discussed in
+# the commentary for the right_posix rule (below).
+
+# Everything is installed into subdirectories of TOPDIR, and used there.
+# TOPDIR should be empty (meaning the root directory),
+# or a directory name that does not end in "/".
+# TOPDIR should be empty or an absolute name unless you're just testing.
+TOPDIR =
+
+# The default local timezone is taken from the file TZDEFAULT.
+TZDEFAULT = $(TOPDIR)/etc/localtime
+
+# The subdirectory containing installed program and data files, and
+# likewise for installed files that can be shared among architectures.
+# These should be relative file names.
+USRDIR = usr
+USRSHAREDIR = $(USRDIR)/share
+
+# "Compiled" timezone information is placed in the "TZDIR" directory
+# (and subdirectories).
+# TZDIR_BASENAME should not contain "/" and should not be ".", ".." or empty.
+TZDIR_BASENAME=	zoneinfo
+TZDIR = $(TOPDIR)/$(USRSHAREDIR)/$(TZDIR_BASENAME)
+
 tzcode/version.h: tzcode/version
 	VERSION=`cat tzcode/version` && printf '%s\n' \
 		'static char const PKGVERSION[]="($(PACKAGE)) ";' \
@@ -56,9 +86,19 @@ tzcode/version.h: tzcode/version
 		>$@.out
 	mv $@.out $@
 
+tzcode/tzdir.h:
+		printf '%s\n' >$@.out \
+		  '#ifndef TZDEFAULT' \
+		  '# define TZDEFAULT "$(TZDEFAULT)" /* default zone */' \
+		  '#endif' \
+		  '#ifndef TZDIR' \
+		  '# define TZDIR "$(TZDIR)" /* TZif directory */' \
+		  '#endif'
+		mv $@.out $@
+
 ### End copied definitions
 
-$(BUILD)/zic: tzcode/zic.c tzcode/version.h
+$(BUILD)/zic: tzcode/zic.c tzcode/version.h tzcode/tzdir.h
 	@echo " HOSTCC $(notdir $@)"
 	$(CC_FOR_BUILD) -DHAVE_GETTEXT=0 -o $@ tzcode/zic.c
 
