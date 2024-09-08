@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.3.6
+
+* Fixes
+  * Support building against Erlang installs with spaces in paths
+
+* Updates
+  * Update the IANA database to 2024b
+  * Update tzcode from 2023c to 2024b version (many POSIX compatibility related updates)
+
 ## v0.3.5
 
 * Updates
