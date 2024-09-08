@@ -39,8 +39,8 @@ else
 endif
 
 # Set Erlang-specific compile and linker flags
-ERL_CFLAGS ?= -I$(ERL_EI_INCLUDE_DIR)
-ERL_LDFLAGS ?= -L$(ERL_EI_LIBDIR) -lei
+ERL_CFLAGS ?= -I"$(ERL_EI_INCLUDE_DIR)"
+ERL_LDFLAGS ?= -L"$(ERL_EI_LIBDIR)" -lei
 
 SRC = c_src/nif.c
 HEADERS =$(wildcard src/*.h)
