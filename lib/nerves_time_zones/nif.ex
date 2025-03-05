@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 Frank Hunleth
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule NervesTimeZones.Nif do
   @on_load {:load_nif, 0}
   @compile {:autoload, false}

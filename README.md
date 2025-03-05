@@ -1,7 +1,9 @@
 # NervesTimeZones
 
 [![Hex version](https://img.shields.io/hexpm/v/nerves_time_zones.svg "Hex version")](https://hex.pm/packages/nerves_time_zones)
-[![CircleCI](https://circleci.com/gh/nerves-time/nerves_time_zones.svg?style=svg)](https://circleci.com/gh/nerves-time/nerves_time_zones)
+[![API docs](https://img.shields.io/hexpm/v/nerves_time_zones.svg?label=hexdocs "API docs")](https://hexdocs.pm/nerves_time_zones/NervesTimeZones.html)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/nerves-time/nerves_time_zones/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nerves-time/nerves_time_zones/tree/main)
+[![REUSE status](https://api.reuse.software/badge/github.com/nerves-time/nerves_time_zones)](https://api.reuse.software/info/github.com/nerves-time/nerves_time_zones)
 
 Local time and time zones for Nerves devices
 

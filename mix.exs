@@ -52,9 +52,11 @@ defmodule NervesTimeZones.MixProject do
         "CHANGELOG.md",
         "c_src/*.[ch]",
         "lib",
-        "LICENSE",
+        "LICENSES",
         "mix.exs",
+        "NOTICE",
         "README.md",
+        "REUSE.toml",
         "Makefile",
         "tzcode/private.h",
         "tzcode/README.md",
@@ -63,8 +65,12 @@ defmodule NervesTimeZones.MixProject do
         "tzcode/zic.c",
         "tzdata.mk"
       ],
-      licenses: ["Apache-2.0"],
-      links: %{"GitHub" => @source_url}
+      licenses: ["Apache-2.0", "CC0-1.0"],
+      links: %{
+        "GitHub" => @source_url,
+        "REUSE Compliance" =>
+          "https://api.reuse.software/info/github.com/nerves-project/nerves_runtime"
+      }
     }
   end
 
