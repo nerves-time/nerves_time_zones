@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2021 Frank Hunleth
+# SPDX-FileCopyrightText: 2021 Ryota Kinukawa
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule NervesTimeZones.Server do
   use GenServer
   require Logger

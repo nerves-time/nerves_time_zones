@@ -1,0 +1,46 @@
+version = 1
+
+[[annotations]]
+path = [
+ ".circleci/config.yml",
+ ".credo.exs",
+ ".formatter.exs",
+ ".github/dependabot.yml",
+ ".github/workflows/update-iana-db-version.sh",
+ ".github/workflows/update-iana-db-version.yml",
+ ".gitignore",
+ "CHANGELOG.md",
+ "NOTICE",
+ "REUSE.toml",
+ "mix.exs",
+ "mix.lock"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "None"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = [
+ "README.md"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021 Frank Hunleth"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# See tzcode license that the code is public domain. CC0-1.0 seems closest.
+[[annotations]]
+path = [
+ "tzcode/LICENSE",
+ "tzcode/tzfile.5.txt",
+ "tzcode/private.h",
+ "tzcode/README.md",
+ "tzcode/version",
+ "tzcode/tzfile.h",
+ "tzcode/zic.c",
+ "tzcode/zic.8.txt",
+ "tzdata.mk"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "None"
+SPDX-License-Identifier = "CC0-1.0"
+
