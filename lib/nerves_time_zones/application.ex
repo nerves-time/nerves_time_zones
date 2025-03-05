@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2021 Frank Hunleth
+# SPDX-FileCopyrightText: 2022 Benjamin Milde
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 defmodule NervesTimeZones.Application do
   @moduledoc false
 
