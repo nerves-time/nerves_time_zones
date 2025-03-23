@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.8
+
+* Updates
+  * Update the IANA database to 2025b
+  * Make [REUSE compliant](https://reuse.software/)
+
 ## v0.3.7
 
 * Updates
