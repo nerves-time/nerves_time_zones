@@ -1,7 +1,7 @@
 # NervesTimeZones
 
 [![Hex version](https://img.shields.io/hexpm/v/nerves_time_zones.svg "Hex version")](https://hex.pm/packages/nerves_time_zones)
-[![API docs](https://img.shields.io/hexpm/v/nerves_time_zones.svg?label=hexdocs "API docs")](https://hexdocs.pm/nerves_time_zones/NervesTimeZones.html)
+[![API docs](https://img.shields.io/hexpm/v/nerves_time_zones.svg?label=hexdocs "API docs")](https://nerves-time-zones.hexdocs.pm/NervesTimeZones.html)
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/nerves-time/nerves_time_zones/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nerves-time/nerves_time_zones/tree/main)
 [![REUSE status](https://api.reuse.software/badge/github.com/nerves-time/nerves_time_zones)](https://api.reuse.software/info/github.com/nerves-time/nerves_time_zones)
 
@@ -13,7 +13,7 @@ provides the following:
 1. Set your time zone and have it be used for local time calls like
    `NaiveDateTime.local_now/0`. The time zone persists across reboots.
 2. Set up Elixir's [Calendar time zone
-   database](https://hexdocs.pm/elixir/Calendar.html) using
+   database](https://elixir.hexdocs.pm/Calendar.html) using
    [`zoneinfo`](https://hex.pm/packages/zoneinfo)
 3. Provide a small time zone database appropriate for many embedded devices
 
