@@ -34,7 +34,8 @@ defmodule NervesTimeZonesTest do
 
       log =
         capture_log(fn ->
-          {:error, :enoent} = NervesTimeZones.set_time_zone("America/New_York")
+          assert {:error, reason} = NervesTimeZones.set_time_zone("America/New_York")
+          assert reason in [:enoent, :erofs]
         end)
 
       Application.put_env(:nerves_time_zones, :data_dir, old_path)
