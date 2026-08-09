@@ -4,7 +4,7 @@ defmodule NervesTimeZones.MixProject do
   @app :nerves_time_zones
   @version "0.3.8"
   @source_url "https://github.com/nerves-time/nerves_time_zones"
-  @tzdata_version "2025b"
+  @tzdata_version "2026c"
   @tzdata_earliest_date DateTime.to_unix(~U[2022-01-01 00:00:00Z])
   @tzdata_latest_date DateTime.new!(
                         Date.new!(Date.utc_today().year + 11, 1, 1),
