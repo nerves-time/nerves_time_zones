@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.3.9
+
+* Updates
+  * Update the IANA database to 2026c
+  * Improve build product determinism when using defaults. This rounds the end
+    date timezone calculations to following Jan 1 after the current date+10
+    years. Previously, you'd get a small change in every time zone file on each
+    rebuild.
+  * Require Elixir 1.15+ due to updates in dependent libraries
+
 ## v0.3.8
 
 * Updates
