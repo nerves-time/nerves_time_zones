@@ -12,7 +12,7 @@ defmodule NervesTimeZones.MixProject do
     [
       app: @app,
       version: @version,
-      elixir: "~> 1.13",
+      elixir: "~> 1.15",
       description: description(),
       package: package(),
       source_url: @source_url,
@@ -26,12 +26,7 @@ defmodule NervesTimeZones.MixProject do
       deps: deps(),
       dialyzer: [
         flags: [:unmatched_returns, :error_handling, :missing_return, :extra_return, :underspecs]
-      ],
-      preferred_cli_env: %{
-        docs: :docs,
-        "hex.publish": :docs,
-        "hex.build": :docs
-      }
+      ]
     ]
   end
 
@@ -40,6 +35,10 @@ defmodule NervesTimeZones.MixProject do
       extra_applications: [:logger],
       mod: {NervesTimeZones.Application, []}
     ]
+  end
+
+  def cli do
+    [preferred_envs: %{docs: :docs, "hex.publish": :docs, "hex.build": :docs}]
   end
 
   defp description do
