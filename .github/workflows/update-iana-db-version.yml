@@ -11,7 +11,7 @@ jobs:
     name: Check for IANA Database updates
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
     - run: .github/workflows/update-iana-db-version.sh
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
