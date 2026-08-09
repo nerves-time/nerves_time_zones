@@ -6,7 +6,12 @@ defmodule NervesTimeZones.MixProject do
   @source_url "https://github.com/nerves-time/nerves_time_zones"
   @tzdata_version "2025b"
   @tzdata_earliest_date DateTime.to_unix(~U[2022-01-01 00:00:00Z])
-  @tzdata_latest_date System.os_time(:second) + 10 * 365 * 86400
+  @tzdata_latest_date DateTime.new!(
+                        Date.new!(Date.utc_today().year + 11, 1, 1),
+                        ~T[00:00:00],
+                        "Etc/UTC"
+                      )
+                      |> DateTime.to_unix()
 
   def project do
     [

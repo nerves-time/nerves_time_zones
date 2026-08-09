@@ -67,8 +67,9 @@ config :nerves_time_zones, default_time_zone: "Europe/Paris"
 ```
 
 NervesTimeZones maintains only a subset of the available timezone database information
-to save on file size. The default keeps `[2022-01-01, +10 years]` relative to the
-date of compilation. Both ends can be adjusted in the config like this:
+to save on file size. The default keeps records from 2022-01-01 through January 1 of
+the year following 10 years from compilation. Both ends can be adjusted in the config
+like this:
 
 ```elixir
 config :nerves_time_zones,
