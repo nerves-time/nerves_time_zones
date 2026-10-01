@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.10
+
+* Updates
+  * Update the IANA database to 2026e
+
 ## v0.3.9
 
 * Updates
