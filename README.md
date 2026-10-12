@@ -2,6 +2,7 @@
 
 [![Hex version](https://img.shields.io/hexpm/v/nerves_time_zones.svg "Hex version")](https://hex.pm/packages/nerves_time_zones)
 [![API docs](https://img.shields.io/hexpm/v/nerves_time_zones.svg?label=hexdocs "API docs")](https://nerves-time-zones.hexdocs.pm/NervesTimeZones.html)
+[![Nerves compatibility](https://compatibility.nerves-project.org/badge/nerves_time_zones.svg)](https://compatibility.nerves-project.org/packages/nerves_time_zones)
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/nerves-time/nerves_time_zones/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/nerves-time/nerves_time_zones/tree/main)
 [![REUSE status](https://api.reuse.software/badge/github.com/nerves-time/nerves_time_zones)](https://api.reuse.software/info/github.com/nerves-time/nerves_time_zones)
 
