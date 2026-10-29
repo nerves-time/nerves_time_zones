@@ -22,4 +22,48 @@ defmodule TzdataTest do
       assert NaiveDateTime.compare(@latest_record_after, meta.latest_record_utc) == :lt
     end
   end
+
+  @tag :tmp_dir
+  test "rebuilds the database only when the configured range changes", %{tmp_dir: tmp_dir} do
+    on_exit(fn -> File.rm_rf!(tmp_dir) end)
+
+    {meta, _output} = build_database(tmp_dir, ~U[2022-01-01 00:00:00Z], ~U[2030-01-01 00:00:00Z])
+    assert meta.earliest_record_utc == ~N[2022-01-01 00:00:00]
+    assert meta.latest_record_utc == ~N[2030-01-01 00:00:00]
+
+    {meta, _output} = build_database(tmp_dir, ~U[2023-01-01 00:00:00Z], ~U[2030-01-01 00:00:00Z])
+    assert meta.earliest_record_utc == ~N[2023-01-01 00:00:00]
+    assert meta.latest_record_utc == ~N[2030-01-01 00:00:00]
+
+    {meta, _output} = build_database(tmp_dir, ~U[2023-01-01 00:00:00Z], ~U[2031-01-01 00:00:00Z])
+    assert meta.earliest_record_utc == ~N[2023-01-01 00:00:00]
+    assert meta.latest_record_utc == ~N[2031-01-01 00:00:00]
+
+    {_meta, output} = build_database(tmp_dir, ~U[2023-01-01 00:00:00Z], ~U[2031-01-01 00:00:00Z])
+    refute output =~ "ZIC"
+  end
+
+  defp build_database(path, earliest, latest) do
+    env =
+      Mix.Project.config()[:make_env].()
+      |> Map.merge(%{
+        "MIX_APP_PATH" => path,
+        "TZDATA_EARLIEST_DATE" => to_string(DateTime.to_unix(earliest)),
+        "TZDATA_LATEST_DATE" => to_string(DateTime.to_unix(latest))
+      })
+      |> Map.to_list()
+
+    {output, status} =
+      System.cmd("make", ["-f", "tzdata.mk", "all"], env: env, stderr_to_stdout: true)
+
+    assert status == 0, output
+
+    {:ok, tzif} =
+      path
+      |> Path.join("priv/zoneinfo/America/New_York")
+      |> File.read!()
+      |> Zoneinfo.TZif.parse()
+
+    {Zoneinfo.Meta.to_meta("America/New_York", tzif), output}
+  end
 end

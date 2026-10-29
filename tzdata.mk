@@ -102,9 +102,15 @@ $(BUILD)/zic: tzcode/zic.c tzcode/version.h tzcode/tzdir.h
 	@echo " HOSTCC $(notdir $@)"
 	$(CC_FOR_BUILD) -DHAVE_GETTEXT=0 -o $@ tzcode/zic.c
 
-$(PREFIX)/zoneinfo: $(BUILD)/zic $(BUILD)/tzdata/.extracted Makefile
+ifneq ($(shell cat "$(BUILD)/zic.options" 2>/dev/null),$(ZIC_OPTIONS))
+.PHONY: $(PREFIX)/zoneinfo
+endif
+
+$(PREFIX)/zoneinfo: $(BUILD)/zic $(BUILD)/tzdata/.extracted Makefile tzdata.mk
 	@echo "    ZIC $(notdir $@)"
 	cd $(BUILD)/tzdata && $(BUILD)/zic -d $@ $(ZIC_OPTIONS) $(TDATA)
+	printf '%s\n' '$(ZIC_OPTIONS)' > $(BUILD)/zic.options
+	touch $@
 
 $(TZDATA_ARCHIVE_PATH):
 	@echo "   CURL $(notdir $@)"
