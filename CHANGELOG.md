@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.3.11
+
+* Updates
+  * Update the IANA database to 2026f
+
+* Fixes
+  * Support long TZif paths
+  * Fall back to the default time zone when the persisted value is invalid
+
 ## v0.3.10
 
 * Updates
