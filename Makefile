@@ -51,7 +51,7 @@ HEADERS =$(wildcard src/*.h)
 OBJ = $(SRC:c_src/%.c=$(BUILD)/%.o)
 
 calling_from_make:
-	mix compile
+	MAKEFLAGS= MFLAGS= mix compile
 
 all: install tzdata
 

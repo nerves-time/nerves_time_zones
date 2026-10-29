@@ -23,7 +23,7 @@ BUILD  = $(MIX_APP_PATH)/build
 CC_FOR_BUILD=cc
 
 calling_from_make:
-	mix compile
+	MAKEFLAGS= MFLAGS= mix compile
 
 all: $(PREFIX) $(BUILD) $(PREFIX)/zoneinfo
 
