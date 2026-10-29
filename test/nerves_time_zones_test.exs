@@ -171,6 +171,33 @@ defmodule NervesTimeZonesTest do
     assert NaiveDateTime.diff(NaiveDateTime.local_now(), expected) < 2
   end
 
+  @tag :tmp_dir
+  test "sets local time with a long TZif path", %{tmp_dir: tmp_dir} do
+    time_zone = NervesTimeZones.get_time_zone()
+
+    on_exit(fn ->
+      :ok = NervesTimeZones.set_time_zone(time_zone)
+      File.rm_rf!(tmp_dir)
+    end)
+
+    path =
+      Path.join([tmp_dir, String.duplicate("a", 120), String.duplicate("b", 120), "Tokyo"])
+
+    File.mkdir_p!(Path.dirname(path))
+    File.cp!(Path.join(Zoneinfo.tzpath(), "Asia/Tokyo"), path)
+    assert byte_size(path) > 255
+
+    assert :ok = NervesTimeZones.Nif.set(to_charlist(path))
+
+    assert_raise ArgumentError, fn ->
+      NervesTimeZones.Nif.set(to_charlist(path) ++ [0x100])
+    end
+
+    assert_in_delta NaiveDateTime.diff(NaiveDateTime.local_now(), NaiveDateTime.utc_now()),
+                    9 * 60 * 60,
+                    2
+  end
+
   test "warns if someone else sets Calendar's TimeZoneDatabase" do
     assert capture_log(fn ->
              Application.stop(:nerves_time_zones)
