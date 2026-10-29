@@ -71,8 +71,10 @@ defmodule NervesTimeZones.Server do
     state = struct(__MODULE__, init_args)
 
     time_zone =
-      case Persistence.load_time_zone(state.data_dir) do
-        {:ok, zone} -> zone
+      with {:ok, zone} <- Persistence.load_time_zone(state.data_dir),
+           :ok <- check_time_zone(zone) do
+        zone
+      else
         _other -> state.default_time_zone
       end
 

@@ -27,6 +27,35 @@ defmodule NervesTimeZonesTest do
       assert NervesTimeZones.get_time_zone() == "America/New_York"
     end
 
+    @tag :tmp_dir
+    test "invalid saved time zones fall back to the default", %{tmp_dir: tmp_dir} do
+      old_path = Application.fetch_env!(:nerves_time_zones, :data_dir)
+
+      on_exit(fn ->
+        Application.put_env(:nerves_time_zones, :data_dir, old_path)
+        restart_app()
+        File.rm_rf!(tmp_dir)
+      end)
+
+      Application.put_env(:nerves_time_zones, :data_dir, tmp_dir)
+      default_time_zone = Application.get_env(:nerves_time_zones, :default_time_zone, "Etc/UTC")
+
+      for invalid_time_zone <- ["America/New_Yor", <<0x1F30D::utf8>>] do
+        File.write!(Path.join(tmp_dir, "localtime"), invalid_time_zone)
+        assert :ok = restart_app()
+
+        assert NervesTimeZones.get_time_zone() == default_time_zone
+        assert {:ok, expected} = DateTime.now(default_time_zone)
+
+        assert_in_delta NaiveDateTime.diff(
+                          NaiveDateTime.local_now(),
+                          DateTime.to_naive(expected)
+                        ),
+                        0,
+                        2
+      end
+    end
+
     test "save fails" do
       old_path = Application.get_env(:nerves_time_zones, :data_dir)
       Application.put_env(:nerves_time_zones, :data_dir, "/proc/place/that/fails")
